@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<config>
+    <modules>
+        <PaynetEasy_Paynet>
+            <version>0.2.0</version>
+        </PaynetEasy_Paynet>
+    </modules>
+    <global>
+        <models>
+            <paynet>
+                <class>PaynetEasy_Paynet_Model</class>
+                <resourceModel>paynet_resource</resourceModel>
+            </paynet>
+        </models>
+        <blocks>
+            <paynet>
+                <class>PaynetEasy_Paynet_Block</class>
+            </paynet>
+        </blocks>
+        <helpers>
+            <paynet>
+                <class>PaynetEasy_Paynet_Helper</class>
+            </paynet>
+        </helpers>
+    </global>
+    <frontend>
+        <routers>
+            <paynet>
+                <use>standard</use>
+                <args>
+                    <module>PaynetEasy_Paynet</module>
+                    <frontName>paynet</frontName>
+                </args>
+            </paynet>
+        </routers>
+        <translate>
+            <modules>
+                <PaynetEasy_Paynet>
+                    <files>
+                        <default>PaynetEasy_Paynet.csv</default>
+                    </files>
+                </PaynetEasy_Paynet>
+            </modules>
+        </translate>
+        <layout>
+            <updates>
+                <paynet module="PaynetEasy_Paynet">
+                    <file>paynet.xml</file>
+                </paynet>
+            </updates>
+        </layout>
+    </frontend>
+    <adminhtml>
+        <translate>
+            <modules>
+                <PaynetEasy_Paynet>
+                    <files>
+                        <default>PaynetEasy_Paynet.csv</default>
+                    </files>
+                </PaynetEasy_Paynet>
+            </modules>
+        </translate>
+    </adminhtml>
+    <payment>
+        <groups>
+            <paynet_saleform>Paynet Saleform</paynet_saleform>
+        </groups>
+    </payment>
+    <default>
+        <payment>
+            <paynet_saleform>
+                <model>paynet/saleform</model>
+                <active>0</active>
+                <title>Paynet Saleform</title>
+                <visible_on_cart>1</visible_on_cart>
+                <is_sandbox>1</is_sandbox>
+            </paynet_saleform>
+        </payment>
+    </default>
+</config>

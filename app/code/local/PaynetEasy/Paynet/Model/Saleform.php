@@ -2,8 +2,12 @@
 
 require_once Mage::getBaseDir('lib') . '/autoload.php';
 
-use PaynetEasy\Paynet\OrderData\Order;
-use PaynetEasy\Paynet\OrderData\Customer;
+use PaynetEasy\Paynet\OrderData\Order           as PaynetOrder;
+use PaynetEasy\Paynet\OrderData\Customer        as PaynetCustomer;
+
+use Mage_Sales_Model_Order                      as MageOrder;
+use Mage_Core_Model_Store                       as MageStore;
+use Mage_Sales_Model_Order_Payment_Transaction  as MagePaymentTransaction;
 
 use PaynetEasy\Paynet\OrderProcessor;
 
@@ -12,22 +16,44 @@ use PaynetEasy\Paynet\Exception\ResponseException;
 class   PaynetEasy_Paynet_Model_Saleform
 extends Mage_Payment_Model_Method_Abstract
 {
+    /**
+     * Internal model code
+     *
+     * @var string
+     */
     protected $_code          = 'paynet_saleform';
+
+    /**
+     * Name for the block with additional payment method information
+     *
+     * @var string
+     */
     protected $_formBlockType = 'paynet/saleform';
 
     /**
      * Can use this payment method in administration panel?
+     *
+     * @var boolean
      */
     protected $_canUseInternal          = false;
 
     /**
      * Is this payment method suitable for multi-shipping checkout?
+     *
+     * @var boolean
      */
     protected $_canUseForMultishipping  = false;
 
+    /**
+     * Call PaynetEasy_Paynet_Model_Saleform::initialize() or not
+     *
+     * @var boolean
+     */
     protected $_isInitializeNeeded      = true;
 
     /**
+     * Service for order processing
+     *
      * @var     OrderProcessor
      */
     protected $_orderProcessor;
@@ -41,7 +67,7 @@ extends Mage_Payment_Model_Method_Abstract
     public function initialize($paymentAction, $stateObject)
     {
         $stateObject->setData('payment_action', $paymentAction);
-        $stateObject->setState(Mage_Sales_Model_Order::STATE_PENDING_PAYMENT);
+        $stateObject->setState(MageOrder::STATE_PENDING_PAYMENT);
         $stateObject->setStatus('pending_payment');
         $stateObject->setIsNotified(false);
         $stateObject->save();
@@ -69,12 +95,14 @@ extends Mage_Payment_Model_Method_Abstract
     }
 
     /**
-     * Метод выполняет запрос к платежной форме
+     * Starts order processing.
+     * Method executes query to paynet gateway and returns response from gateway.
+     * After that user must be redirected to the Response::getRedirectUrl()
      *
-     * @param       integer                         $orderId                ID заказа
-     * @param       string                          $callbackUrl            Ссылка, на которую должен прийти ответ
+     * @param       integer                         $orderId                Order ID
+     * @param       string                          $callbackUrl            Url for final payment processing
      *
-     * @return      \PaynetEasy\Paynet\Transport\Response                   Ответ от Paynet
+     * @return      \PaynetEasy\Paynet\Transport\Response                   Gateway response object
      */
     public function startSale($orderId, $callbackUrl)
     {
@@ -97,7 +125,7 @@ extends Mage_Payment_Model_Method_Abstract
 
         $magePayment->setTransactionId($paynetOrder->getPaynetOrderId());
         $magePayment
-            ->addTransaction(Mage_Sales_Model_Order_Payment_Transaction::TYPE_PAYMENT)
+            ->addTransaction(MagePaymentTransaction::TYPE_PAYMENT)
             ->setIsClosed(0)
             ->save();
 
@@ -108,12 +136,16 @@ extends Mage_Payment_Model_Method_Abstract
     }
 
     /**
-     * @param       integer     $orderId            ID заказа
-     * @param       array       $callback           Данные, полученные от Paynet
+     * Finish order processing.
+     * Method checks callnack data and returns object with them.
+     * After that order processing result can be displayed.
      *
-     * @return      CallbackResponse                Callback object
+     * @param       integer             $orderId                    Order ID
+     * @param       array               $callback                   Callback data from Paynet
+     *
+     * @return      PaynetEasy\Paynet\Transport\CallbackResponse    Callback object
      */
-    public function finishSale($orderId, $callback)
+    public function finishSale($orderId, array $callback)
     {
         $mageOrder = $this->getMageOrder($orderId);
 
@@ -122,7 +154,7 @@ extends Mage_Payment_Model_Method_Abstract
             throw new ResponseException("PaymentTransaction with id '{$orderId}' not found");
         }
 
-        if ($mageOrder->getState() == Mage_Sales_Model_Order::STATE_PROCESSING)
+        if ($mageOrder->getState() == MageOrder::STATE_PROCESSING)
         {
             return $mageOrder;
         }
@@ -155,6 +187,8 @@ extends Mage_Payment_Model_Method_Abstract
     }
 
     /**
+     * Get service for order processing
+     *
      * @return \PaynetEasy\Paynet\OrderProcessor
      */
     protected function getOrderProcessor()
@@ -177,7 +211,11 @@ extends Mage_Payment_Model_Method_Abstract
     }
 
     /**
-     * @return array
+     * Get payment query config
+     *
+     * @param       string      $redirectUrl        Url for final payment processing
+     *
+     * @return      array                           Config
      */
     protected function getQueryConfig($redirectUrl = null)
     {
@@ -198,9 +236,11 @@ extends Mage_Payment_Model_Method_Abstract
     }
 
     /**
-     * @param   int     $orderId
+     * Get Magento order object by ID
      *
-     * @return  Mage_Sales_Model_Order
+     * @param       int                         $orderId            Order ID
+     *
+     * @return      Mage_Sales_Model_Order                          Order object
      */
     protected function getMageOrder($orderId)
     {
@@ -208,15 +248,17 @@ extends Mage_Payment_Model_Method_Abstract
     }
 
     /**
-     * @param   Mage_Sales_Model_Order      $mageOrder
+     * Get Paynet order object by Magento order object
      *
-     * @return  \PaynetEasy\Paynet\OrderData\Order
+     * @param       Mage_Sales_Model_Order      $mageOrder          Magento order
+     *
+     * @return      \PaynetEasy\Paynet\OrderData\Order              Paynet order
      */
-    protected function getPaynetOrder(Mage_Sales_Model_Order $mageOrder)
+    protected function getPaynetOrder(MageOrder $mageOrder)
     {
         $mageAddress    = $mageOrder->getBillingAddress();
-        $paynetOrder    = new Order;
-        $paynetCustomer = new Customer;
+        $paynetOrder    = new PaynetOrder;
+        $paynetCustomer = new PaynetCustomer;
 
         $paynetCustomer
             ->setCountry($mageAddress->getCountryId())
@@ -248,36 +290,42 @@ extends Mage_Payment_Model_Method_Abstract
     }
 
     /**
-     * @param   Mage_Sales_Model_Order      $order
+     * Get paynet order description by magento order
      *
-     * @return  string
+     * @param       MageOrder      $order      Magento order
+     *
+     * @return      string                                  Paynet order description
      */
-    protected function getPaynetOrderDescription($order)
+    protected function getPaynetOrderDescription(MageOrder $order)
     {
         return  Mage::helper('paynet')->__('Shopping in: ') . ' ' .
-                Mage::getStoreConfig(Mage_Core_Model_Store::XML_PATH_STORE_STORE_NAME, $order->getStoreId()) . '; ' .
+                Mage::getStoreConfig(MageStore::XML_PATH_STORE_STORE_NAME, $order->getStoreId()) . '; ' .
                 Mage::helper('paynet')->__('Order ID: ') . ' ' . $order->getIncrementId();
     }
 
     /**
-     * @param   Mage_Sales_Model_Order      $order
-     * @param   string                      $message
+     * Cancel Magento order
+     *
+     * @param   Mage_Sales_Model_Order      $order          Order
+     * @param   string                      $message        Cancel message
      */
-    protected function cancelOrder($order, $message)
+    protected function cancelOrder(MageOrder $order, $message)
     {
         $order->cancel()
-              ->setState(Mage_Sales_Model_Order::STATE_CANCELED, true, $message, true)
+              ->setState(MageOrder::STATE_CANCELED, true, $message, true)
               ->sendOrderUpdateEmail()
               ->setIsNotified(true)
               ->save();
     }
 
     /**
-     * @param   Mage_Sales_Model_Order      $order
+     * Complete Magento order processing
+     *
+     * @param   Mage_Sales_Model_Order      $order          Order
      */
-    protected function completeOrder($order)
+    protected function completeOrder(MageOrder $order)
     {
-        $order->setState(Mage_Sales_Model_Order::STATE_PROCESSING, true)
+        $order->setState(MageOrder::STATE_PROCESSING, true)
               ->sendOrderUpdateEmail()
               ->setIsNotified(true)
               ->save();

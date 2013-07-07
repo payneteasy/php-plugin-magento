@@ -4,14 +4,21 @@ class   PaynetEasy_Paynet_SaleformController
 extends         Mage_Core_Controller_Front_Action
 {
     /**
-     * @var PaynetEasy_Paynet_Model_Abstract
+     * Model instance
+     *
+     * @var PaynetEasy_Paynet_Model_Saleform
      */
     protected $_model;
 
+    /**
+     * Model code
+     *
+     * @var string
+     */
     protected $_modelCode;
 
     /**
-     * Redirect to Paynet
+     * Start order processing and redirect to Paynet
      */
     public function redirectAction()
     {
@@ -36,6 +43,10 @@ extends         Mage_Core_Controller_Front_Action
         }
     }
 
+    /**
+     * Receive paynet callback data, finish order processing
+     * and redirect to page with payment result
+     */
     public function processAction()
     {
         $orderId  = $this->getRequest()->order_id;
@@ -70,6 +81,11 @@ extends         Mage_Core_Controller_Front_Action
         }
     }
 
+    /**
+     * Get model code
+     *
+     * @return      string      Model code
+     */
     protected function getModelCode()
     {
         if (empty ($this->_modelCode))
@@ -90,9 +106,11 @@ extends         Mage_Core_Controller_Front_Action
     }
 
     /**
-     * @param       string      $model_name         Model name to instantiate
+     * Get model instance
      *
-     * @return PaynetEasy_Paynet_Model_Abstract
+     * @param       string          $model_name         Model name to instantiate
+     *
+     * @return      PaynetEasy_Paynet_Model_Saleform    Model instance
      */
     protected function getModel()
     {
@@ -105,6 +123,8 @@ extends         Mage_Core_Controller_Front_Action
     }
 
     /**
+     * Get session object
+     *
      * @return      Mage_Checkout_Model_Session
      */
     protected function getSession()
@@ -113,15 +133,20 @@ extends         Mage_Core_Controller_Front_Action
     }
 
     /**
-     * @param   string      $message
+     * Redirect if payment not passed
+     *
+     * @param       string      $errorMessage        Error messahe
      */
-    protected function errorRedirect($message)
+    protected function errorRedirect($errorMessage)
     {
-        $this->getSession()->addError(Mage::helper('paynet')->__($message));
+        $this->getSession()->addError(Mage::helper('paynet')->__($errorMessage));
 
         $this->_redirect('checkout/cart');
     }
 
+    /**
+     * Redirect if payment successfully processing
+     */
     protected function successRedirect()
     {
         $this->getSession()->getQuote()->setIsActive(false)->save();

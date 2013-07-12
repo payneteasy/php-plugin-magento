@@ -2,16 +2,16 @@
 
 require_once Mage::getBaseDir('lib') . '/autoload.php';
 
-use PaynetEasy\Paynet\OrderData\Order           as PaynetOrder;
-use PaynetEasy\Paynet\OrderData\Customer        as PaynetCustomer;
+use PaynetEasy\PaynetEasyApi\OrderData\Order           as PaynetOrder;
+use PaynetEasy\PaynetEasyApi\OrderData\Customer        as PaynetCustomer;
 
 use Mage_Sales_Model_Order                      as MageOrder;
 use Mage_Core_Model_Store                       as MageStore;
 use Mage_Sales_Model_Order_Payment_Transaction  as MagePaymentTransaction;
 
-use PaynetEasy\Paynet\OrderProcessor;
+use PaynetEasy\PaynetEasyApi\OrderProcessor;
 
-use PaynetEasy\Paynet\Exception\ResponseException;
+use PaynetEasy\PaynetEasyApi\Exception\ResponseException;
 
 class   PaynetEasy_Paynet_Model_Saleform
 extends Mage_Payment_Model_Method_Abstract
@@ -102,7 +102,7 @@ extends Mage_Payment_Model_Method_Abstract
      * @param       integer                         $orderId                Order ID
      * @param       string                          $callbackUrl            Url for final payment processing
      *
-     * @return      \PaynetEasy\Paynet\Transport\Response                   Gateway response object
+     * @return      \PaynetEasy\PaynetEasyApi\Transport\Response                   Gateway response object
      */
     public function startSale($orderId, $callbackUrl)
     {
@@ -143,7 +143,7 @@ extends Mage_Payment_Model_Method_Abstract
      * @param       integer             $orderId                    Order ID
      * @param       array               $callback                   Callback data from Paynet
      *
-     * @return      PaynetEasy\Paynet\Transport\CallbackResponse    Callback object
+     * @return      PaynetEasy\PaynetEasyApi\Transport\CallbackResponse    Callback object
      */
     public function finishSale($orderId, array $callback)
     {
@@ -189,7 +189,7 @@ extends Mage_Payment_Model_Method_Abstract
     /**
      * Get service for order processing
      *
-     * @return \PaynetEasy\Paynet\OrderProcessor
+     * @return \PaynetEasy\PaynetEasyApi\OrderProcessor
      */
     protected function getOrderProcessor()
     {
@@ -252,7 +252,7 @@ extends Mage_Payment_Model_Method_Abstract
      *
      * @param       Mage_Sales_Model_Order      $mageOrder          Magento order
      *
-     * @return      \PaynetEasy\Paynet\OrderData\Order              Paynet order
+     * @return      \PaynetEasy\PaynetEasyApi\OrderData\Order              Paynet order
      */
     protected function getPaynetOrder(MageOrder $mageOrder)
     {

@@ -1,0 +1,87 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
+    ],
+    "hash": "78e9f136d0b97e954a8b04647b436077",
+    "packages": [
+        {
+            "name": "payneteasy/php-library-payneteasy-api",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/payneteasy/php-library-payneteasy-api.git",
+                "reference": "17444d595d73b947c64ff8dc3d1bbb4398713eae"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/payneteasy/php-library-payneteasy-api/zipball/17444d595d73b947c64ff8dc3d1bbb4398713eae",
+                "reference": "17444d595d73b947c64ff8dc3d1bbb4398713eae",
+                "shasum": ""
+            },
+            "archive": {
+                "exclude": [
+                    "/examples",
+                    "/tests"
+                ]
+            },
+            "require": {
+                "ext-curl": "*",
+                "php": ">=5.3.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0.0-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "PaynetEasy\\PaynetEasyApi\\": "source/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Dmitry Kashinsky",
+                    "email": "ed@yoyyo.biz",
+                    "role": "developer"
+                },
+                {
+                    "name": "Artem Ponomarenko",
+                    "email": "imenem@inbox.ru",
+                    "role": "developer"
+                }
+            ],
+            "description": "PHP library for PaynetEasy payment API",
+            "homepage": "http://payneteasy.com/",
+            "keywords": [
+                "payment",
+                "payneteasy"
+            ],
+            "support": {
+                "source": "https://github.com/payneteasy/php-library-payneteasy-api/tree/master",
+                "issues": "https://github.com/payneteasy/php-library-payneteasy-api/issues"
+            },
+            "time": "2013-07-12 10:37:29"
+        }
+    ],
+    "packages-dev": [
+
+    ],
+    "aliases": [
+
+    ],
+    "minimum-stability": "dev",
+    "stability-flags": [
+
+    ],
+    "platform": {
+        "php": ">=5.3.0"
+    },
+    "platform-dev": [
+
+    ]
+}

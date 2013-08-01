@@ -74,7 +74,7 @@
                 <active>0</active>
                 <title>Paynet Saleform</title>
                 <visible_on_cart>1</visible_on_cart>
-                <is_sandbox>1</is_sandbox>
+                <gateway_mode>sandbox</gateway_mode>
             </paynet_saleform>
         </payment>
     </default>

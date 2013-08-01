@@ -1,7 +1,7 @@
 <?php
 
 class   PaynetEasy_Paynet_SaleformController
-extends         Mage_Core_Controller_Front_Action
+extends Mage_Core_Controller_Front_Action
 {
     /**
      * Model instance

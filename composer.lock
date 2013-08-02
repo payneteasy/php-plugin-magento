@@ -3,7 +3,7 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "78e9f136d0b97e954a8b04647b436077",
+    "hash": "d4839ac7d7046079cc481896dea8fbce",
     "packages": [
         {
             "name": "payneteasy/php-library-payneteasy-api",
@@ -11,18 +11,19 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/payneteasy/php-library-payneteasy-api.git",
-                "reference": "72017e8c5ccebfb8a9082e0ca2884185b53f0c0d"
+                "reference": "db7ec48245df6423c888b736612ff47f71c013c5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/payneteasy/php-library-payneteasy-api/zipball/72017e8c5ccebfb8a9082e0ca2884185b53f0c0d",
-                "reference": "72017e8c5ccebfb8a9082e0ca2884185b53f0c0d",
+                "url": "https://api.github.com/repos/payneteasy/php-library-payneteasy-api/zipball/db7ec48245df6423c888b736612ff47f71c013c5",
+                "reference": "db7ec48245df6423c888b736612ff47f71c013c5",
                 "shasum": ""
             },
             "archive": {
                 "exclude": [
-                    "/examples",
-                    "/tests"
+                    "/doc",
+                    "/example",
+                    "/test"
                 ]
             },
             "require": {
@@ -65,7 +66,7 @@
                 "source": "https://github.com/payneteasy/php-library-payneteasy-api/tree/master",
                 "issues": "https://github.com/payneteasy/php-library-payneteasy-api/issues"
             },
-            "time": "2013-08-01 14:56:33"
+            "time": "2013-08-02 14:30:04"
         }
     ],
     "packages-dev": [

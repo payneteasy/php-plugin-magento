@@ -35,5 +35,18 @@
     "config":
     {
         "vendor-dir": "lib"
+    },
+    "archive":
+    {
+        "exclude":
+        [
+            "!/lib",
+            "doc",
+            "example",
+            "test",
+            "composer.*",
+            "LICENSE",
+            "README.md"
+        ]
     }
 }

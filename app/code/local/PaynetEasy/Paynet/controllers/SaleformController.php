@@ -18,7 +18,7 @@ extends Mage_Core_Controller_Front_Action
     protected $_modelCode;
 
     /**
-     * Start order processing and redirect to Paynet
+     * Start order processing and redirect to PaynetEasy
      */
     public function redirectAction()
     {
@@ -44,7 +44,7 @@ extends Mage_Core_Controller_Front_Action
     }
 
     /**
-     * Receive paynet callback data, finish order processing
+     * Receive PaynetEasy callback data, finish order processing
      * and redirect to page with payment result
      */
     public function processAction()

@@ -58,13 +58,6 @@ extends Mage_Payment_Model_Method_Abstract
     protected $_isInitializeNeeded      = true;
 
     /**
-     * Service for order processing
-     *
-     * @var     OrderProcessor
-     */
-    protected $_paymentProcessor;
-
-    /**
      * Instantiate state and set it to state object
      *
      * @param       string            $paymentAction
@@ -142,7 +135,7 @@ extends Mage_Payment_Model_Method_Abstract
 
     /**
      * Finish order processing.
-     * Method checks callnack data and returns object with them.
+     * Method checks callback data and returns object with them.
      * After that order processing result can be displayed.
      *
      * @param       integer     $orderId        Order ID
@@ -156,7 +149,7 @@ extends Mage_Payment_Model_Method_Abstract
 
         if (!$mageOrder || !$mageOrder->getId())
         {
-            throw new ResponseException("PaymentTransaction with id '{$orderId}' not found");
+            throw new ResponseException("Order with id '{$orderId}' not found");
         }
 
         if ($mageOrder->getState() == MageOrder::STATE_PROCESSING)
@@ -192,18 +185,20 @@ extends Mage_Payment_Model_Method_Abstract
     }
 
     /**
-     * Get service for order processing
+     * Get service for payment processing
      *
-     * @return \PaynetEasy\PaynetEasyApi\OrderProcessor
+     * @return \PaynetEasy\PaynetEasyApi\PaymentProcessor
      */
     protected function getPaymentProcessor()
     {
-        if (is_null($this->_paymentProcessor))
+        static $processor = null;
+
+        if (empty($processor))
         {
-            $this->_paymentProcessor = new PaymentProcessor;
+            $processor = new PaymentProcessor;
         }
 
-        return $this->_paymentProcessor;
+        return $processor;
     }
 
     /**
@@ -219,7 +214,7 @@ extends Mage_Payment_Model_Method_Abstract
     }
 
     /**
-     * Get Paynet order object by Magento order object
+     * Get Paynet payment transaction object by Magento order object
      *
      * @param       MageOrder       $mageOrder          Magento order
      * @param       string          $redirectUrl        Url for final payment processing
@@ -258,7 +253,7 @@ extends Mage_Payment_Model_Method_Abstract
         $paynetPayment
             ->setClientId($mageOrder->getIncrementId())
             ->setPaynetId($mageOrder->getPayment()->getLastTransId())
-            ->setDescription($this->getPaynetOrderDescription($mageOrder))
+            ->setDescription($this->getPaynetPaymentDescription($mageOrder))
             ->setAmount($mageOrder->getBaseGrandTotal())
             ->setCurrency($mageOrder->getOrderCurrencyCode())
             ->setCustomer($paynetCustomer)
@@ -291,13 +286,13 @@ extends Mage_Payment_Model_Method_Abstract
     }
 
     /**
-     * Get paynet order description by magento order
+     * Get paynet payment description by magento order
      *
      * @param       MageOrder      $order      Magento order
      *
      * @return      string                                  Paynet order description
      */
-    protected function getPaynetOrderDescription(MageOrder $order)
+    protected function getPaynetPaymentDescription(MageOrder $order)
     {
         return  Mage::helper('paynet')->__('Shopping in: ') . ' ' .
                 Mage::getStoreConfig(MageStore::XML_PATH_STORE_STORE_NAME, $order->getStoreId()) . '; ' .

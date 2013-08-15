@@ -1,6 +1,6 @@
 <?php
 
-class   PaynetEasy_Paynet_SaleformController
+class   PaynetEasy_Paynet_SaleController
 extends Mage_Core_Controller_Front_Action
 {
     /**
@@ -28,10 +28,15 @@ extends Mage_Core_Controller_Front_Action
 
         try
         {
-            $response = $this->getModel()
-                             ->startSale($orderId, $callbackUrl);
+            $this
+                ->getModel()
+                ->startSale($orderId, $callbackUrl)
+            ;
 
-            $this->getResponse()->setRedirect($response->getRedirectUrl());
+            $this
+                ->getResponse()
+                ->setRedirect(Mage::getUrl("paynet/{$this->getModelCode()}/status"))
+            ;
         }
         catch (Exception $e)
         {
@@ -39,6 +44,11 @@ extends Mage_Core_Controller_Front_Action
             Mage::logException($e);
             $this->errorRedirect('technical_error');
         }
+    }
+
+    public function statusAction()
+    {
+        ;
     }
 
     /**

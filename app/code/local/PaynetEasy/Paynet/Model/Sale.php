@@ -6,6 +6,7 @@ use PaynetEasy\PaynetEasyApi\PaymentData\PaymentTransaction as PaynetTransaction
 use PaynetEasy\PaynetEasyApi\PaymentData\Payment            as PaynetPayment;
 use PaynetEasy\PaynetEasyApi\PaymentData\Customer           as PaynetCustomer;
 use PaynetEasy\PaynetEasyApi\PaymentData\BillingAddress     as PaynetAddress;
+use PaynetEasy\PaynetEasyApi\PaymentData\CreditCard         as PaynetCard;
 use PaynetEasy\PaynetEasyApi\PaymentData\QueryConfig        as PaynetConfig;
 
 use PaynetEasy\PaynetEasyApi\Utils\Validator;
@@ -18,7 +19,7 @@ use PaynetEasy\PaynetEasyApi\PaymentProcessor;
 
 use PaynetEasy\PaynetEasyApi\Exception\ResponseException;
 
-class   PaynetEasy_Paynet_Model_Saleform
+class   PaynetEasy_Paynet_Model_Sale
 extends Mage_Payment_Model_Method_Abstract
 {
     /**
@@ -26,14 +27,14 @@ extends Mage_Payment_Model_Method_Abstract
      *
      * @var string
      */
-    protected $_code          = 'paynet_saleform';
+    protected $_code          = 'paynet_sale';
 
     /**
      * Name for the block with additional payment method information
      *
      * @var string
      */
-    protected $_formBlockType = 'paynet/saleform';
+    protected $_formBlockType = 'paynet/sale';
 
     /**
      * Can use this payment method in administration panel?
@@ -69,6 +70,51 @@ extends Mage_Payment_Model_Method_Abstract
         $stateObject->setStatus('pending_payment');
         $stateObject->setIsNotified(false);
         $stateObject->save();
+    }
+
+    /**
+     * Assign data to info model instance
+     *
+     * @param   mixed $data
+     * @return  Mage_Payment_Model_Info
+     */
+    public function assignData($data)
+    {
+        if (!($data instanceof Varien_Object))
+        {
+            $data = new Varien_Object($data);
+        }
+
+        $info = $this->getInfoInstance();
+
+        $info
+            ->setCcOwner($data->getCcOwner())
+            ->setCcNumber($data->getCcNumber())
+            ->setCcCid($data->getCcCid())
+            ->setCcExpMonth($data->getCcExpMonth())
+            ->setCcExpYear($data->getCcExpYear())
+        ;
+
+        return $this;
+    }
+
+    /**
+     * Prepare info instance for save
+     *
+     * @return Mage_Payment_Model_Abstract
+     */
+    public function prepareSave()
+    {
+        $info = $this->getInfoInstance();
+
+        $info->setCcNumberEnc($info->encrypt($info->getCcNumber()));
+        $info->setCcCidEnc($info->encrypt($info->getCcCid()));
+
+        $info
+            ->setCcNumber(null)
+            ->setCcCid(null);
+
+        return $this;
     }
 
     /**
@@ -112,7 +158,7 @@ extends Mage_Payment_Model_Method_Abstract
         {
             $response = $this
                 ->getPaymentProcessor()
-                ->executeQuery('sale-form', $paynetTransaction);
+                ->executeQuery('sale', $paynetTransaction);
         }
         catch (Exception $e)
         {
@@ -223,11 +269,17 @@ extends Mage_Payment_Model_Method_Abstract
     protected function getPaynetTransaction(MageOrder $mageOrder, $redirectUrl = null)
     {
         $mageAddress        = $mageOrder->getBillingAddress();
+        $magePayment        = Mage::getModel('sales/quote')
+            ->load($mageOrder->getQuoteId())
+            ->getPayment()
+        ;
+
         $paynetConfig       = new PaynetConfig;
         $paynetAddress      = new PaynetAddress;
         $paynetTransaction  = new PaynetTransaction;
         $paynetPayment      = new PaynetPayment;
         $paynetCustomer     = new PaynetCustomer;
+        $paynetCard         = new PaynetCard;
 
         $paynetAddress
             ->setCountry($mageAddress->getCountryId())
@@ -241,6 +293,14 @@ extends Mage_Payment_Model_Method_Abstract
         {
             $paynetAddress->setState($mageAddress->getRegionCode());
         }
+
+        $paynetCard
+            ->setCardPrintedName($magePayment->getCcOwner())
+            ->setCreditCardNumber($magePayment->getCcNumber())
+            ->setExpireMonth($magePayment->getCcExpMonth())
+            ->setExpireYear(substr($magePayment->getCcExpYear(), 2))
+            ->setCvv2($magePayment->getCcCid())
+        ;
 
         $paynetCustomer
             ->setEmail($mageAddress->getEmail())
@@ -257,6 +317,7 @@ extends Mage_Payment_Model_Method_Abstract
             ->setCurrency($mageOrder->getOrderCurrencyCode())
             ->setCustomer($paynetCustomer)
             ->setBillingAddress($paynetAddress)
+            ->setCreditCard($paynetCard)
         ;
 
         $paynetConfig

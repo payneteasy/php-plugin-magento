@@ -12,7 +12,6 @@ use PaynetEasy\PaynetEasyApi\PaymentData\QueryConfig;
 use PaynetEasy\PaynetEasyApi\Transport\CallbackResponse;
 
 use Mage_Sales_Model_Order                                  as MageOrder;
-use Mage_Core_Model_Store                                   as MageStore;
 use Mage_Sales_Model_Order_Payment_Transaction              as MageTransaction;
 
 use PaynetEasy\PaynetEasyApi\PaymentProcessor;
@@ -294,9 +293,9 @@ extends Mage_Payment_Model_Method_Abstract
      */
     protected function getPaynetPaymentDescription(MageOrder $order)
     {
-        return  Mage::helper('paynet')->__('Shopping in: ') . ' ' .
-                Mage::getStoreConfig(MageStore::XML_PATH_STORE_STORE_NAME, $order->getStoreId()) . '; ' .
-                Mage::helper('paynet')->__('Order ID: ') . ' ' . $order->getIncrementId();
+        return  Mage::helper('paynet')->__('shopping_in') . ': ' .
+                Mage::app()->getStore($order->getStoreId())->getGroup()->getName() . '; ' .
+                Mage::helper('paynet')->__('order_id') . ': ' . $order->getIncrementId();
     }
 
     /**

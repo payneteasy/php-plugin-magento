@@ -39,7 +39,7 @@ extends Mage_Core_Controller_Front_Action
         {
             Mage::log("There was an error occured for Order '{$orderId}': \n{$e->getMessage()}", Zend_Log::ERR);
             Mage::logException($e);
-            $this->errorRedirect('There was a technical error occured.');
+            $this->errorRedirect('technical_error');
         }
     }
 
@@ -63,7 +63,7 @@ extends Mage_Core_Controller_Front_Action
             Mage::log("There was an error occured for Order '{$orderId}': \n{$e->getMessage()}", Zend_Log::ERR);
             Mage::log("Callback data: " . print_r($callback, true), Zend_Log::DEBUG);
             Mage::logException($e);
-            $this->errorRedirect('There was a technical error occured.');
+            $this->errorRedirect('technical_error');
 
             return;
         }
@@ -77,7 +77,7 @@ extends Mage_Core_Controller_Front_Action
         {
             Mage::log("Payment is not passed", Zend_Log::DEBUG);
             Mage::log("Callback data: " . print_r($callback, true), Zend_Log::DEBUG);
-            $this->errorRedirect('Your payment is not passed.');
+            $this->errorRedirect('payment_not_passed');
         }
     }
 

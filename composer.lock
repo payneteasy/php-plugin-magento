@@ -11,12 +11,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/payneteasy/php-library-payneteasy-api.git",
-                "reference": "db7ec48245df6423c888b736612ff47f71c013c5"
+                "reference": "d36c0c961bbb195facda0a61f80071d1cc13a73e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/payneteasy/php-library-payneteasy-api/zipball/db7ec48245df6423c888b736612ff47f71c013c5",
-                "reference": "db7ec48245df6423c888b736612ff47f71c013c5",
+                "url": "https://api.github.com/repos/payneteasy/php-library-payneteasy-api/zipball/d36c0c961bbb195facda0a61f80071d1cc13a73e",
+                "reference": "d36c0c961bbb195facda0a61f80071d1cc13a73e",
                 "shasum": ""
             },
             "archive": {
@@ -66,7 +66,7 @@
                 "source": "https://github.com/payneteasy/php-library-payneteasy-api/tree/master",
                 "issues": "https://github.com/payneteasy/php-library-payneteasy-api/issues"
             },
-            "time": "2013-08-02 14:30:04"
+            "time": "2013-08-16 10:43:02"
         }
     ],
     "packages-dev": [

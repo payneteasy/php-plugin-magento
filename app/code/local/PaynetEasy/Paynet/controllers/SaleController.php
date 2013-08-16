@@ -6,7 +6,7 @@ extends Mage_Core_Controller_Front_Action
     /**
      * Model instance
      *
-     * @var PaynetEasy_Paynet_Model_Saleform
+     * @var PaynetEasy_Paynet_Model_Sale
      */
     protected $_model;
 
@@ -32,23 +32,71 @@ extends Mage_Core_Controller_Front_Action
                 ->getModel()
                 ->startSale($orderId, $callbackUrl)
             ;
+        }
+        catch (Exception $e)
+        {
+            Mage::log("There was an error occured for Order '{$orderId}': \n{$e->getMessage()}", Zend_Log::ERR);
+            Mage::logException($e);
+            return $this->errorRedirect('technical_error');
+        }
 
-            $this
-                ->getResponse()
-                ->setRedirect(Mage::getUrl("paynet/{$this->getModelCode()}/status"))
+        $this
+            ->getResponse()
+            ->setRedirect(Mage::getUrl("paynet/{$this->getModelCode()}/status",
+                                       array('_secure' => true, 'order_id' => $orderId)))
+        ;
+    }
+
+    /**
+     * Update payment status
+     */
+    public function statusAction()
+    {
+        $orderId   = $this->getRequest()->order_id;
+
+        try
+        {
+            $response = $this
+                ->getModel()
+                ->updateStatus($orderId)
             ;
         }
         catch (Exception $e)
         {
             Mage::log("There was an error occured for Order '{$orderId}': \n{$e->getMessage()}", Zend_Log::ERR);
             Mage::logException($e);
-            $this->errorRedirect('technical_error');
+            return $this->errorRedirect('technical_error');
         }
-    }
 
-    public function statusAction()
-    {
-        ;
+        // reload current page
+        if ($response->isStatusUpdateNeeded())
+        {
+            $statusUrl = Mage::getUrl("paynet/{$this->getModelCode()}/status",
+                                array('_secure' => true, 'order_id' => $orderId));
+
+            $this->loadLayout();
+            $this->getLayout()->getBlock('root')->setTemplate('page/1column.phtml');
+            $this->getLayout()->getBlock('head')->setTitle($this->__('status_title'));
+            $this->getLayout()->getBlock('paynet_status')->assign('formAction', $statusUrl);
+            $this->renderLayout();
+        }
+        // 3D-auth process
+        elseif ($response->isShowHtmlNeeded())
+        {
+            $this
+                ->getResponse()
+                ->setBody($response->getHtml())
+            ;
+        }
+        elseif ($response->isApproved())
+        {
+            $this->successRedirect();
+        }
+        else
+        {
+            Mage::log("Payment is not passed", Zend_Log::DEBUG);
+            $this->errorRedirect('payment_not_passed');
+        }
     }
 
     /**
@@ -70,9 +118,7 @@ extends Mage_Core_Controller_Front_Action
             Mage::log("There was an error occured for Order '{$orderId}': \n{$e->getMessage()}", Zend_Log::ERR);
             Mage::log("Callback data: " . print_r($callback, true), Zend_Log::DEBUG);
             Mage::logException($e);
-            $this->errorRedirect('technical_error');
-
-            return;
+            return $this->errorRedirect('technical_error');
         }
 
         if ($response->isApproved())
@@ -116,7 +162,7 @@ extends Mage_Core_Controller_Front_Action
      *
      * @param       string          $model_name         Model name to instantiate
      *
-     * @return      PaynetEasy_Paynet_Model_Saleform    Model instance
+     * @return      PaynetEasy_Paynet_Model_Sale        Model instance
      */
     protected function getModel()
     {

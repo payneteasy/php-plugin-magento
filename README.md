@@ -3,7 +3,7 @@
 ## Доступная функциональность
 
 Данный  плагин позволяет производить оплату с помощью [merchant PaynetEasy API](http://wiki.payneteasy.com/index.php/PnE:Merchant_API). На текущий момент реализованы следующие платежные методы:
-- [ ] [Sale Transactions](http://wiki.payneteasy.com/index.php/PnE:Sale_Transactions)
+- [x] [Sale Transactions](http://wiki.payneteasy.com/index.php/PnE:Sale_Transactions)
 - [ ] [Preauth/Capture Transactions](http://wiki.payneteasy.com/index.php/PnE:Preauth/Capture_Transactions)
 - [ ] [Transfer Transactions](http://wiki.payneteasy.com/index.php/PnE:Transfer_Transactions)
 - [ ] [Return Transactions](http://wiki.payneteasy.com/index.php/PnE:Return_Transactions)

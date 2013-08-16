@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+
+<layout version="0.1.0">
+    <paynet_sale_status translate="label">
+        <reference name="content">
+            <action method="setTemplate">
+                <template>paynet/status.phtml</template>
+            </action>
+            <block type="paynet/status" name="paynet_status" as="paynet.status" template="paynet/status.phtml" />
+        </reference>
+    </paynet_sale_status>
+</layout>

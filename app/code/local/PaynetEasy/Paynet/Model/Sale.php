@@ -141,7 +141,7 @@ extends Mage_Payment_Model_Method_Abstract
     /**
      * Starts order processing.
      * Method executes query to paynet gateway and returns response from gateway.
-     * After that user must be redirected to the Response::getRedirectUrl()
+     * After that payment status must be updated.
      *
      * @param       integer                         $orderId                Order ID
      * @param       string                          $callbackUrl            Url for final payment processing
@@ -174,6 +174,51 @@ extends Mage_Payment_Model_Method_Abstract
 
         $mageOrder->save();
         $magePayment->save();
+
+        return $response;
+    }
+
+    /**
+     * Updates payment status.
+     * Method executes query to paynet gateway and returns response from gateway.
+     * After this method call must be one of the following actions:
+     * - Display html from Response::getHtml() if Response::isShowHtmlNeeded() is true
+     * - Update payment status if Response::isStatusUpdateNeeded() is true
+     * - Continue order processing otherwise
+     *
+     * @param       integer                         $orderId                Order ID
+     *
+     * @return      \PaynetEasy\PaynetEasyApi\Transport\Response            Gateway response object
+     */
+    public function updateStatus($orderId)
+    {
+        $mageOrder          = $this->getMageOrder($orderId);
+        $paynetTransaction  = $this->getPaynetTransaction($mageOrder);
+
+        try
+        {
+            $response = $this
+                ->getPaymentProcessor()
+                ->executeQuery('status', $paynetTransaction);
+        }
+        catch (Exception $e)
+        {
+            $this->cancelOrder($mageOrder, "Order '{$orderId}' cancelled, error occured");
+            throw $e;
+        }
+
+        if ($paynetTransaction->isApproved())
+        {
+            $this->completeOrder($mageOrder);
+        }
+        elseif ($paynetTransaction->isFinished())
+        {
+            $this->cancelOrder($mageOrder, $paynetTransaction->getLastError()->getMessage());
+        }
+        else
+        {
+            $mageOrder->save();
+        }
 
         return $response;
     }

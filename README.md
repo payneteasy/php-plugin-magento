@@ -27,10 +27,9 @@
 
 ### Самостоятельная сборка пакета
 1. [Установите composer](http://getcomposer.org/doc/00-intro.md), если его еще нет
-2. Клонируйте репозиторий с плагином: `composer create-project payneteasy/php-plugin-magento`
+2. Клонируйте репозиторий с плагином: `composer create-project payneteasy/php-plugin-magento --stability=dev --prefer-dist`
 3. Перейдите в папку плагина: `cd php-plugin-magento`
-4. Установите зависимости плагина: `composer install --prefer-dist --optimize-autoloader`
-5. Упакуйте плагин в архив: `composer archive --format=zip`
+4. Упакуйте плагин в архив: `composer archive --format=zip`
 
 ## Установка плагина
 

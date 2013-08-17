@@ -1,11 +1,19 @@
 <div>
-    <h2><?php echo $this->__('processing_payment') ?>...</h2>
+    <div class="page-title">
+        <h1><?php echo $this->__('processing_payment') ?>...</h1>
+    </div>
 
     <p><?php echo $this->__('auto_refresh') ?> 5 <?php echo $this->__('seconds') ?></p>
     <p><?php echo $this->__('next_refresh') ?> <span id="seconds-remaining">5</span> <?php echo $this->__('seconds') ?></p>
 
     <form action="<?php print $formAction; ?>" name="update_status" method="post">
-        <input type="submit" value="<?php echo $this->__('check_result') ?>" />
+        <div class="buttons-set">
+            <button id="send" class="button" name="send" title="Login" type="submit">
+                <span>
+                    <span><?php echo $this->__('check_result') ?></span>
+                </span>
+            </button>
+        </div>
     </form>
 </div>
 <script type="text/javascript">

@@ -5,7 +5,7 @@
         <payment>
             <groups>
                 <paynet_saleform translate="label">
-                    <label>Paynet Saleform</label>
+                    <label>PaynetEasy Saleform</label>
                     <frontend_type>text</frontend_type>
                     <sort_order>1</sort_order>
                     <show_in_default>1</show_in_default>
@@ -89,7 +89,7 @@
                     </fields>
                 </paynet_saleform>
                 <paynet_sale translate="label">
-                    <label>Paynet Sale</label>
+                    <label>PaynetEasy Sale</label>
                     <frontend_type>text</frontend_type>
                     <sort_order>1</sort_order>
                     <show_in_default>1</show_in_default>

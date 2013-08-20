@@ -3,7 +3,7 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "fe26710eeed5ae4d0d48084a3b75d30a",
+    "hash": "d6728a1fdbc51520f30644ea38dd4e11",
     "packages": [
         {
             "name": "payneteasy/php-library-payneteasy-api",
@@ -11,20 +11,13 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/payneteasy/php-library-payneteasy-api.git",
-                "reference": "f16b16ec7e52b8bfe1675ba73a599fca80618864"
+                "reference": "2a230adeb1af8fcec339b50f609aaaf35349a68f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/payneteasy/php-library-payneteasy-api/zipball/f16b16ec7e52b8bfe1675ba73a599fca80618864",
-                "reference": "f16b16ec7e52b8bfe1675ba73a599fca80618864",
+                "url": "https://api.github.com/repos/payneteasy/php-library-payneteasy-api/zipball/2a230adeb1af8fcec339b50f609aaaf35349a68f",
+                "reference": "2a230adeb1af8fcec339b50f609aaaf35349a68f",
                 "shasum": ""
-            },
-            "archive": {
-                "exclude": [
-                    "/doc",
-                    "/example",
-                    "/test"
-                ]
             },
             "require": {
                 "ext-curl": "*",
@@ -41,6 +34,7 @@
                     "PaynetEasy\\PaynetEasyApi\\": "source/"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -62,11 +56,7 @@
                 "payment",
                 "payneteasy"
             ],
-            "support": {
-                "source": "https://github.com/payneteasy/php-library-payneteasy-api/tree/master",
-                "issues": "https://github.com/payneteasy/php-library-payneteasy-api/issues"
-            },
-            "time": "2013-08-16 15:45:44"
+            "time": "2013-08-20 08:41:22"
         }
     ],
     "packages-dev": [

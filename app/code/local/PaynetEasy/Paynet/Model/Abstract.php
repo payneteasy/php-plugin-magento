@@ -112,7 +112,7 @@ extends         Mage_Payment_Model_Method_Abstract
 
     /**
      * Starts order processing.
-     * Method executes query to paynet gateway and returns response from gateway.
+     * Method executes query to PaynetEasy gateway and returns response from gateway.
      * After that user must be:
      * - redirected to the Response::getRedirectUrl() (for *-form queries)
      * - payment status must be updated (for other queries)
@@ -154,7 +154,7 @@ extends         Mage_Payment_Model_Method_Abstract
 
     /**
      * Updates payment status.
-     * Method executes query to paynet gateway and returns response from gateway.
+     * Method executes query to PaynetEasy gateway and returns response from gateway.
      * After this method call must be one of the following actions:
      * - Display html from Response::getHtml() if Response::isShowHtmlNeeded() is true
      * - Update payment status if Response::isStatusUpdateNeeded() is true
@@ -278,12 +278,12 @@ extends         Mage_Payment_Model_Method_Abstract
     }
 
     /**
-     * Get Paynet payment transaction object by Magento order object
+     * Get PaynetEasy payment transaction object by Magento order object
      *
      * @param       MageOrder       $mageOrder          Magento order
      * @param       string          $redirectUrl        Url for final payment processing
      *
-     * @return      PaynetTransaction                   Paynet payment transaction
+     * @return      PaynetTransaction                   PaynetEasy payment transaction
      */
     protected function getPaynetTransaction(MageOrder $mageOrder, $redirectUrl = null)
     {
@@ -298,12 +298,12 @@ extends         Mage_Payment_Model_Method_Abstract
     }
 
     /**
-     * Add payment data to Paynet payment transaction
+     * Add payment data to PaynetEasy payment transaction
      *
-     * @param       PaynetTransaction       $paynetTransaction      Paynet payment transaction
+     * @param       PaynetTransaction       $paynetTransaction      PaynetEasy payment transaction
      * @param       MageOrder               $mageOrder              Magento order
      *
-     * @return      PaynetTransaction                   Paynet payment transaction
+     * @return      PaynetTransaction                               PaynetEasy payment transaction
      */
     protected function addPaymentData(PaynetTransaction $paynetTransaction, MageOrder $mageOrder)
     {
@@ -318,12 +318,12 @@ extends         Mage_Payment_Model_Method_Abstract
     }
 
     /**
-     * Add customer data to Paynet payment
+     * Add customer data to PaynetEasy payment
      *
-     * @param       PaynetTransaction       $paynetTransaction      Paynet payment transaction
+     * @param       PaynetTransaction       $paynetTransaction      PaynetEasy payment transaction
      * @param       MageOrder               $mageOrder              Magento order
      *
-     * @return      PaynetTransaction                   Paynet payment transaction
+     * @return      PaynetTransaction                               PaynetEasy payment transaction
      */
     protected function addCustomerData(PaynetTransaction $paynetTransaction, MageOrder $mageOrder)
     {
@@ -340,12 +340,12 @@ extends         Mage_Payment_Model_Method_Abstract
     }
 
     /**
-     * Add customer data to Paynet payment
+     * Add customer data to PaynetEasy payment
      *
-     * @param       PaynetTransaction       $paynetTransaction      Paynet payment transaction
+     * @param       PaynetTransaction       $paynetTransaction      PaynetEasy payment transaction
      * @param       MageOrder               $mageOrder              Magento order
      *
-     * @return      PaynetTransaction                   Paynet payment transaction
+     * @return      PaynetTransaction                               PaynetEasy payment transaction
      */
     protected function addBillingAdressData(PaynetTransaction $paynetTransaction, MageOrder $mageOrder)
     {
@@ -372,12 +372,12 @@ extends         Mage_Payment_Model_Method_Abstract
     }
 
     /**
-     * Add credit card data to Paynet payment
+     * Add credit card data to PaynetEasy payment
      *
-     * @param       PaynetTransaction       $paynetTransaction      Paynet payment transaction
+     * @param       PaynetTransaction       $paynetTransaction      PaynetEasy payment transaction
      * @param       MageOrder               $mageOrder              Magento order
      *
-     * @return      PaynetTransaction                   Paynet payment transaction
+     * @return      PaynetTransaction                               PaynetEasy payment transaction
      */
     protected function addCreditCardData(PaynetTransaction $paynetTransaction, MageOrder $mageOrder)
     {
@@ -398,12 +398,12 @@ extends         Mage_Payment_Model_Method_Abstract
     }
 
     /**
-     * Add query config data to Paynet payment transaction
+     * Add query config data to PaynetEasy payment transaction
      *
-     * @param       PaynetTransaction       $paynetTransaction      Paynet payment transaction
+     * @param       PaynetTransaction       $paynetTransaction      PaynetEasy payment transaction
      * @param       string                  $redirectUrl            Url for final payment processing
      *
-     * @return      PaynetTransaction                   Paynet payment transaction
+     * @return      PaynetTransaction                               PaynetEasy payment transaction
      */
     protected function addQueryConfigData(PaynetTransaction $paynetTransaction, $redirectUrl = null)
     {
@@ -428,11 +428,11 @@ extends         Mage_Payment_Model_Method_Abstract
     }
 
     /**
-     * Get paynet payment description by magento order
+     * Get PaynetEasy payment description by magento order
      *
      * @param       MageOrder      $order      Magento order
      *
-     * @return      string                                  Paynet order description
+     * @return      string                     PaynetEasy order description
      */
     protected function getPaynetPaymentDescription(MageOrder $order)
     {

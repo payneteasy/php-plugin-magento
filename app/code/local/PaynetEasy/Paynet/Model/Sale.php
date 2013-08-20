@@ -68,12 +68,12 @@ extends PaynetEasy_Paynet_Model_Abstract
     }
 
     /**
-     * Get Paynet payment transaction object by Magento order object
+     * Get PaynetEasy payment transaction object by Magento order object
      *
      * @param       MageOrder       $mageOrder          Magento order
      * @param       string          $redirectUrl        Url for final payment processing
      *
-     * @return      PaynetEasy\PaynetEasyApi\PaymentData\PaymentTransaction     Paynet payment transaction
+     * @return      PaynetEasy\PaynetEasyApi\PaymentData\PaymentTransaction     PaynetEasy payment transaction
      */
     protected function getPaynetTransaction(MageOrder $mageOrder, $redirectUrl = null)
     {

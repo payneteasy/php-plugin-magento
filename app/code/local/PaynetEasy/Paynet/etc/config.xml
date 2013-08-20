@@ -64,8 +64,8 @@
     </adminhtml>
     <payment>
         <groups>
-            <paynet_saleform>Paynet Saleform</paynet_saleform>
-            <paynet_sale>Paynet Sale</paynet_sale>
+            <paynet_saleform>PaynetEasy Saleform</paynet_saleform>
+            <paynet_sale>PaynetEasy Sale</paynet_sale>
         </groups>
     </payment>
     <default>
@@ -73,14 +73,14 @@
             <paynet_saleform>
                 <model>paynet/saleform</model>
                 <active>0</active>
-                <title>Paynet Saleform</title>
+                <title>PaynetEasy Saleform</title>
                 <visible_on_cart>1</visible_on_cart>
                 <gateway_mode>sandbox</gateway_mode>
             </paynet_saleform>
             <paynet_sale>
                 <model>paynet/sale</model>
                 <active>0</active>
-                <title>Paynet Sale</title>
+                <title>PaynetEasy Sale</title>
                 <visible_on_cart>1</visible_on_cart>
                 <gateway_mode>sandbox</gateway_mode>
             </paynet_sale>

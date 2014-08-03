@@ -62,8 +62,8 @@ extends         Mage_Payment_Model_Method_Abstract
     /**
      * Instantiate state and set it to state object
      *
-     * @param       string            $paymentAction
-     * @param       Varien_Object     $stateObject
+     * @param string        $paymentAction
+     * @param Varien_Object $stateObject
      */
     public function initialize($paymentAction, $stateObject)
     {
@@ -73,18 +73,15 @@ extends         Mage_Payment_Model_Method_Abstract
         $stateObject->setIsNotified(false);
         $stateObject->save();
 
-        if (empty($this->_code))
-        {
+        if (empty($this->_code)) {
             throw new RuntimeException('Internal model code must be setted');
         }
 
-        if (empty($this->_formBlockType))
-        {
+        if (empty($this->_formBlockType)) {
             throw new RuntimeException('Name for the block with additional payment method information must be setted');
         }
 
-        if (empty($this->_initialApiMethod))
-        {
+        if (empty($this->_initialApiMethod)) {
             throw new RuntimeException('Initial API method for model payment flow must be setted');
         }
     }
@@ -100,8 +97,7 @@ extends         Mage_Payment_Model_Method_Abstract
 
         preg_match('#(?<=_)[a-z]+$#i', get_called_class(), $result);
 
-        if (empty ($result))
-        {
+        if (empty ($result)) {
             throw new RuntimeException('Can not get model code from model class');
         }
 
@@ -117,10 +113,10 @@ extends         Mage_Payment_Model_Method_Abstract
      * - redirected to the Response::getRedirectUrl() (for *-form queries)
      * - payment status must be updated (for other queries)
      *
-     * @param       integer                         $orderId                Order ID
-     * @param       string                          $callbackUrl            Url for final payment processing
+     * @param integer $orderId     Order ID
+     * @param string  $callbackUrl Url for final payment processing
      *
-     * @return      \PaynetEasy\PaynetEasyApi\Transport\Response            Gateway response object
+     * @return \PaynetEasy\PaynetEasyApi\Transport\Response Gateway response object
      */
     public function startSale($orderId, $callbackUrl)
     {
@@ -128,14 +124,11 @@ extends         Mage_Payment_Model_Method_Abstract
         $magePayment        = $mageOrder->getPayment();
         $paynetTransaction  = $this->getPaynetTransaction($mageOrder, $callbackUrl);
 
-        try
-        {
+        try {
             $response = $this
                 ->getPaymentProcessor()
                 ->executeQuery($this->_initialApiMethod, $paynetTransaction);
-        }
-        catch (Exception $e)
-        {
+        } catch (Exception $e) {
             $this->cancelOrder($mageOrder, "Order '{$orderId}' cancelled, error occured");
             throw $e;
         }
@@ -160,37 +153,29 @@ extends         Mage_Payment_Model_Method_Abstract
      * - Update payment status if Response::isStatusUpdateNeeded() is true
      * - Continue order processing otherwise
      *
-     * @param       integer                         $orderId                Order ID
+     * @param integer $orderId Order ID
      *
-     * @return      \PaynetEasy\PaynetEasyApi\Transport\Response            Gateway response object
+     * @return \PaynetEasy\PaynetEasyApi\Transport\Response Gateway response object
      */
     public function updateStatus($orderId)
     {
         $mageOrder          = $this->getMageOrder($orderId);
         $paynetTransaction  = $this->getPaynetTransaction($mageOrder);
 
-        try
-        {
+        try {
             $response = $this
                 ->getPaymentProcessor()
                 ->executeQuery('status', $paynetTransaction);
-        }
-        catch (Exception $e)
-        {
+        } catch (Exception $e) {
             $this->cancelOrder($mageOrder, "Order '{$orderId}' cancelled, error occured");
             throw $e;
         }
 
-        if ($paynetTransaction->isApproved())
-        {
+        if ($paynetTransaction->isApproved()) {
             $this->completeOrder($mageOrder);
-        }
-        elseif ($paynetTransaction->isFinished())
-        {
+        } elseif ($paynetTransaction->isFinished()) {
             $this->cancelOrder($mageOrder, $paynetTransaction->getLastError()->getMessage());
-        }
-        else
-        {
+        } else {
             $mageOrder->save();
         }
 
@@ -202,46 +187,38 @@ extends         Mage_Payment_Model_Method_Abstract
      * Method checks callback data and returns object with them.
      * After that order processing result can be displayed.
      *
-     * @param       integer     $orderId        Order ID
-     * @param       array       $callback       Callback data from Paynet
+     * @param integer $orderId  Order ID
+     * @param array   $callback Callback data from Paynet
      *
-     * @return      CallbackResponse            Callback object
+     * @return CallbackResponse Callback object
      */
     public function finishSale($orderId, array $callback)
     {
         $mageOrder = $this->getMageOrder($orderId);
 
-        if (!$mageOrder || !$mageOrder->getId())
-        {
+        if (!$mageOrder || !$mageOrder->getId()) {
             throw new ResponseException("Order with id '{$orderId}' not found");
         }
 
-        if ($mageOrder->getState() == MageOrder::STATE_PROCESSING)
-        {
+        if ($mageOrder->getState() == MageOrder::STATE_PROCESSING) {
             return $mageOrder;
         }
 
         $paynetTransaction = $this->getPaynetTransaction($mageOrder);
         $paynetTransaction->setStatus(PaynetTransaction::STATUS_PROCESSING);
 
-        try
-        {
+        try {
             $callbackResponse = $this
                 ->getPaymentProcessor()
                 ->processCustomerReturn(new CallbackResponse($callback), $paynetTransaction);
-        }
-        catch (Exception $e)
-        {
+        } catch (Exception $e) {
             $this->cancelOrder($mageOrder, "Order '{$orderId}' cancelled, error occured");
             throw $e;
         }
 
-        if ($paynetTransaction->isApproved())
-        {
+        if ($paynetTransaction->isApproved()) {
             $this->completeOrder($mageOrder);
-        }
-        else
-        {
+        } else {
             $this->cancelOrder($mageOrder, $paynetTransaction->getLastError()->getMessage());
         }
 
@@ -257,8 +234,7 @@ extends         Mage_Payment_Model_Method_Abstract
     {
         static $processor = null;
 
-        if (empty($processor))
-        {
+        if (empty($processor)) {
             $processor = new PaymentProcessor;
         }
 
@@ -268,9 +244,9 @@ extends         Mage_Payment_Model_Method_Abstract
     /**
      * Get Magento order object by ID
      *
-     * @param       int                         $orderId            Order ID
+     * @param int $orderId Order ID
      *
-     * @return      Mage_Sales_Model_Order                          Order object
+     * @return Mage_Sales_Model_Order Order object
      */
     protected function getMageOrder($orderId)
     {
@@ -280,10 +256,10 @@ extends         Mage_Payment_Model_Method_Abstract
     /**
      * Get PaynetEasy payment transaction object by Magento order object
      *
-     * @param       MageOrder       $mageOrder          Magento order
-     * @param       string          $redirectUrl        Url for final payment processing
+     * @param MageOrder $mageOrder   Magento order
+     * @param string    $redirectUrl Url for final payment processing
      *
-     * @return      PaynetTransaction                   PaynetEasy payment transaction
+     * @return PaynetTransaction PaynetEasy payment transaction
      */
     protected function getPaynetTransaction(MageOrder $mageOrder, $redirectUrl = null)
     {
@@ -300,10 +276,10 @@ extends         Mage_Payment_Model_Method_Abstract
     /**
      * Add payment data to PaynetEasy payment transaction
      *
-     * @param       PaynetTransaction       $paynetTransaction      PaynetEasy payment transaction
-     * @param       MageOrder               $mageOrder              Magento order
+     * @param PaynetTransaction $paynetTransaction PaynetEasy payment transaction
+     * @param MageOrder         $mageOrder         Magento order
      *
-     * @return      PaynetTransaction                               PaynetEasy payment transaction
+     * @return PaynetTransaction PaynetEasy payment transaction
      */
     protected function addPaymentData(PaynetTransaction $paynetTransaction, MageOrder $mageOrder)
     {
@@ -320,10 +296,10 @@ extends         Mage_Payment_Model_Method_Abstract
     /**
      * Add customer data to PaynetEasy payment
      *
-     * @param       PaynetTransaction       $paynetTransaction      PaynetEasy payment transaction
-     * @param       MageOrder               $mageOrder              Magento order
+     * @param PaynetTransaction $paynetTransaction PaynetEasy payment transaction
+     * @param MageOrder         $mageOrder         Magento order
      *
-     * @return      PaynetTransaction                               PaynetEasy payment transaction
+     * @return PaynetTransaction PaynetEasy payment transaction
      */
     protected function addCustomerData(PaynetTransaction $paynetTransaction, MageOrder $mageOrder)
     {
@@ -342,10 +318,10 @@ extends         Mage_Payment_Model_Method_Abstract
     /**
      * Add customer data to PaynetEasy payment
      *
-     * @param       PaynetTransaction       $paynetTransaction      PaynetEasy payment transaction
-     * @param       MageOrder               $mageOrder              Magento order
+     * @param PaynetTransaction $paynetTransaction PaynetEasy payment transaction
+     * @param MageOrder         $mageOrder         Magento order
      *
-     * @return      PaynetTransaction                               PaynetEasy payment transaction
+     * @return PaynetTransaction PaynetEasy payment transaction
      */
     protected function addBillingAdressData(PaynetTransaction $paynetTransaction, MageOrder $mageOrder)
     {
@@ -361,8 +337,7 @@ extends         Mage_Payment_Model_Method_Abstract
             ->setPhone($mageAddress->getTelephone())
         ;
 
-        if (Validator::validateByRule($mageAddress->getRegionCode(), Validator::COUNTRY, false))
-        {
+        if (Validator::validateByRule($mageAddress->getRegionCode(), Validator::COUNTRY, false)) {
             $paynetTransaction
                 ->getPayment()
                 ->getBillingAddress()
@@ -374,10 +349,10 @@ extends         Mage_Payment_Model_Method_Abstract
     /**
      * Add credit card data to PaynetEasy payment
      *
-     * @param       PaynetTransaction       $paynetTransaction      PaynetEasy payment transaction
-     * @param       MageOrder               $mageOrder              Magento order
+     * @param PaynetTransaction $paynetTransaction PaynetEasy payment transaction
+     * @param MageOrder         $mageOrder         Magento order
      *
-     * @return      PaynetTransaction                               PaynetEasy payment transaction
+     * @return PaynetTransaction PaynetEasy payment transaction
      */
     protected function addCreditCardData(PaynetTransaction $paynetTransaction, MageOrder $mageOrder)
     {
@@ -400,10 +375,10 @@ extends         Mage_Payment_Model_Method_Abstract
     /**
      * Add query config data to PaynetEasy payment transaction
      *
-     * @param       PaynetTransaction       $paynetTransaction      PaynetEasy payment transaction
-     * @param       string                  $redirectUrl            Url for final payment processing
+     * @param PaynetTransaction $paynetTransaction PaynetEasy payment transaction
+     * @param string            $redirectUrl       Url for final payment processing
      *
-     * @return      PaynetTransaction                               PaynetEasy payment transaction
+     * @return PaynetTransaction PaynetEasy payment transaction
      */
     protected function addQueryConfigData(PaynetTransaction $paynetTransaction, $redirectUrl = null)
     {
@@ -417,8 +392,7 @@ extends         Mage_Payment_Model_Method_Abstract
             ->setGatewayUrlProduction($this->getConfigData('production_api_url'))
         ;
 
-        if (Validator::validateByRule($redirectUrl, Validator::URL, false))
-        {
+        if (Validator::validateByRule($redirectUrl, Validator::URL, false)) {
             $paynetTransaction
                 ->getQueryConfig()
                 ->setRedirectUrl($redirectUrl)
@@ -430,9 +404,9 @@ extends         Mage_Payment_Model_Method_Abstract
     /**
      * Get PaynetEasy payment description by magento order
      *
-     * @param       MageOrder      $order      Magento order
+     * @param MageOrder $order Magento order
      *
-     * @return      string                     PaynetEasy order description
+     * @return string PaynetEasy order description
      */
     protected function getPaynetPaymentDescription(MageOrder $order)
     {
@@ -444,8 +418,8 @@ extends         Mage_Payment_Model_Method_Abstract
     /**
      * Cancel Magento order
      *
-     * @param   MageOrder       $order          Order
-     * @param   string          $message        Cancel message
+     * @param MageOrder $order   Order
+     * @param string    $message Cancel message
      */
     protected function cancelOrder(MageOrder $order, $message)
     {
@@ -459,7 +433,7 @@ extends         Mage_Payment_Model_Method_Abstract
     /**
      * Complete Magento order processing
      *
-     * @param   MageOrde        $order          Order
+     * @param MageOrde $order Order
      */
     protected function completeOrder(MageOrder $order)
     {

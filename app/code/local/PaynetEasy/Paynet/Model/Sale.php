@@ -25,13 +25,12 @@ extends PaynetEasy_Paynet_Model_Abstract
     /**
      * Assign data to info model instance
      *
-     * @param   mixed $data
-     * @return  Mage_Payment_Model_Info
+     * @param  mixed                   $data
+     * @return Mage_Payment_Model_Info
      */
     public function assignData($data)
     {
-        if (!($data instanceof Varien_Object))
-        {
+        if (!($data instanceof Varien_Object)) {
             $data = new Varien_Object($data);
         }
 
@@ -70,10 +69,10 @@ extends PaynetEasy_Paynet_Model_Abstract
     /**
      * Get PaynetEasy payment transaction object by Magento order object
      *
-     * @param       MageOrder       $mageOrder          Magento order
-     * @param       string          $redirectUrl        Url for final payment processing
+     * @param MageOrder $mageOrder   Magento order
+     * @param string    $redirectUrl Url for final payment processing
      *
-     * @return      PaynetEasy\PaynetEasyApi\PaymentData\PaymentTransaction     PaynetEasy payment transaction
+     * @return PaynetEasy\PaynetEasyApi\PaymentData\PaymentTransaction PaynetEasy payment transaction
      */
     protected function getPaynetTransaction(MageOrder $mageOrder, $redirectUrl = null)
     {

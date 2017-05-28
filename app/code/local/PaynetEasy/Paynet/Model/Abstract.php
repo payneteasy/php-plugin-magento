@@ -4,7 +4,7 @@ require_once Mage::getBaseDir('lib') . '/autoload.php';
 
 use PaynetEasy\PaynetEasyApi\PaymentData\PaymentTransaction as PaynetTransaction;
 
-use PaynetEasy\PaynetEasyApi\Utils\Validator;
+use PaynetEasy\PaynetEasyApi\Util\Validator;
 use PaynetEasy\PaynetEasyApi\Transport\CallbackResponse;
 
 use Mage_Sales_Model_Order                                  as MageOrder;

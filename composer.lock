@@ -1,9 +1,10 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "This file is @generated automatically"
     ],
-    "hash": "d6728a1fdbc51520f30644ea38dd4e11",
+    "content-hash": "216455690046c0cca23b77d6ead337ca",
     "packages": [
         {
             "name": "payneteasy/php-library-payneteasy-api",
@@ -11,17 +12,21 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/payneteasy/php-library-payneteasy-api.git",
-                "reference": "2a230adeb1af8fcec339b50f609aaaf35349a68f"
+                "reference": "e3484aa37b6594231f59b1f43523603aa704f093"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/payneteasy/php-library-payneteasy-api/zipball/2a230adeb1af8fcec339b50f609aaaf35349a68f",
-                "reference": "2a230adeb1af8fcec339b50f609aaaf35349a68f",
+                "url": "https://api.github.com/repos/payneteasy/php-library-payneteasy-api/zipball/e3484aa37b6594231f59b1f43523603aa704f093",
+                "reference": "e3484aa37b6594231f59b1f43523603aa704f093",
                 "shasum": ""
             },
             "require": {
                 "ext-curl": "*",
-                "php": ">=5.3.0"
+                "php": ">=5.4.0"
+            },
+            "require-dev": {
+                "phake/phake": "2.3.*",
+                "phpunit/phpunit": "4.7.*"
             },
             "type": "library",
             "extra": {
@@ -56,23 +61,17 @@
                 "payment",
                 "payneteasy"
             ],
-            "time": "2013-08-20 08:41:22"
+            "time": "2017-05-24 16:22:51"
         }
     ],
-    "packages-dev": [
-
-    ],
-    "aliases": [
-
-    ],
+    "packages-dev": [],
+    "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": [
-
-    ],
+    "stability-flags": [],
+    "prefer-stable": false,
+    "prefer-lowest": false,
     "platform": {
         "php": ">=5.3.0"
     },
-    "platform-dev": [
-
-    ]
+    "platform-dev": []
 }

@@ -211,15 +211,17 @@ extends         Mage_Payment_Model_Method_Abstract
     public function finishSale($orderId, array $callback)
     {
         $mageOrder = $this->getMageOrder($orderId);
+        $callbackResponse = new CallbackResponse($callback);
 
         if (!$mageOrder || !$mageOrder->getId())
         {
             throw new ResponseException("Order with id '{$orderId}' not found");
         }
 
+        // already finished, no further actions
         if ($mageOrder->getState() == MageOrder::STATE_PROCESSING)
         {
-            return $mageOrder;
+            return $callbackResponse;
         }
 
         $paynetTransaction = $this->getPaynetTransaction($mageOrder);
@@ -227,7 +229,7 @@ extends         Mage_Payment_Model_Method_Abstract
 
         try
         {
-            $callbackResponse = $this
+            $this
                 ->getPaymentProcessor()
                 ->processCustomerReturn(new CallbackResponse($callback), $paynetTransaction);
         }

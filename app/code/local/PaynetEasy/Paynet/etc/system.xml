@@ -37,6 +37,15 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                         </endpoint_id>
+                        <endpoint_mode translate="label">
+                            <label>Endpoint Mode</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>paynet/system_config_source_endpointmode</source_model>
+                            <sort_order>31</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </endpoint_mode>
                         <merchant_login translate="label">
                             <label>Merchant Login</label>
                             <frontend_type>text</frontend_type>
@@ -121,6 +130,15 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                         </endpoint_id>
+                        <endpoint_mode translate="label">
+                            <label>Endpoint Mode</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>paynet/system_config_source_endpointmode</source_model>
+                            <sort_order>31</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </endpoint_mode>
                         <merchant_login translate="label">
                             <label>Merchant Login</label>
                             <frontend_type>text</frontend_type>

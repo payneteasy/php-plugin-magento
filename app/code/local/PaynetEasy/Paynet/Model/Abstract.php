@@ -9,6 +9,7 @@ use PaynetEasy\PaynetEasyApi\Transport\CallbackResponse;
 
 use Mage_Sales_Model_Order                                  as MageOrder;
 use Mage_Sales_Model_Order_Payment_Transaction              as MageTransaction;
+use PaynetEasy_Paynet_Model_System_Config_Source_Endpointmode as EndpointMode;
 
 use PaynetEasy\PaynetEasyApi\PaymentProcessor;
 
@@ -407,9 +408,9 @@ extends         Mage_Payment_Model_Method_Abstract
      */
     protected function addQueryConfigData(PaynetTransaction $paynetTransaction, $redirectUrl = null)
     {
-        $paynetTransaction
-            ->getQueryConfig()
-            ->setEndPoint($this->getConfigData('endpoint_id'))
+        $queryConfig = $paynetTransaction->getQueryConfig();
+        
+        $queryConfig 
             ->setLogin($this->getConfigData('merchant_login'))
             ->setSigningKey($this->getConfigData('merchant_key'))
             ->setGatewayMode($this->getConfigData('gateway_mode'))
@@ -417,10 +418,19 @@ extends         Mage_Payment_Model_Method_Abstract
             ->setGatewayUrlProduction($this->getConfigData('production_api_url'))
         ;
 
+        if ($this->getConfigData('endpoint_mode') == EndpointMode::ENDPOINT_MODE_SIMPLE) {
+            $queryConfig->setEndPoint($this->getConfigData('endpoint_id'));
+        }
+        elseif ($this->getConfigData('endpoint_mode') == EndpointMode::ENDPOINT_MODE_GROUP) {
+            $queryConfig->setEndPointGroup($this->getConfigData('endpoint_id'));
+        }
+        else {
+            throw new InvalidArgumentException("Unknown endpoint mode: '{$this->getConfigData('endpoint_mode')}'");
+        }
+        
         if (Validator::validateByRule($redirectUrl, Validator::URL, false))
         {
-            $paynetTransaction
-                ->getQueryConfig()
+            $queryConfig
                 ->setRedirectUrl($redirectUrl)
                 ->setCallbackUrl($redirectUrl)
             ;

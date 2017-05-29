@@ -76,6 +76,7 @@
                 <title>PaynetEasy Saleform</title>
                 <visible_on_cart>1</visible_on_cart>
                 <gateway_mode>sandbox</gateway_mode>
+                <endpoint_mode>simple</endpoint_mode>
             </paynet_saleform>
             <paynet_sale>
                 <model>paynet/sale</model>
@@ -83,6 +84,7 @@
                 <title>PaynetEasy Sale</title>
                 <visible_on_cart>1</visible_on_cart>
                 <gateway_mode>sandbox</gateway_mode>
+                <endpoint_mode>simple</endpoint_mode>
             </paynet_sale>
         </payment>
     </default>

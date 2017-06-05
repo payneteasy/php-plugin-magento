@@ -527,7 +527,17 @@ extends         Mage_Payment_Model_Method_Abstract
     protected function completeOrder(MageOrder $order)
     {
         $order->addStatusToHistory(MageOrder::STATE_PROCESSING, Mage::helper('paynet')->__('cutomer_returned'));
-                
+        
+        if ($order->canInvoice()) {
+            $invoice = $order->prepareInvoice();
+            $invoice->register()->capture();
+            
+            Mage::getModel('core/resource_transaction')
+                ->addObject($invoice)
+                ->addObject($invoice->getOrder())
+                ->save();
+        }
+        
         $order->setState(MageOrder::STATE_PROCESSING, true, '', true)
               ->sendOrderUpdateEmail()
               ->save();

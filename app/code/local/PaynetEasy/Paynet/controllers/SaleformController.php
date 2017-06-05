@@ -12,6 +12,8 @@ extends PaynetEasy_Paynet_Controller_Abstract
         $callbackUrl   = Mage::getUrl("paynet/{$this->getModelCode()}/process",
                                        array('_secure' => true, 'order_id' => $orderId));
 
+        $this->markAsPending($orderId);
+
         try
         {
             $response = $this->getModel()

@@ -172,14 +172,15 @@ extends         Mage_Payment_Model_Method_Abstract
         }
         catch (Exception $e)
         {
-            $this->cancelOrder($mageOrder, "Order '{$orderId}' cancelled, error occured");
+            $this->cancelOrder($mageOrder, "Order '{$orderId}' cancelled, error occured", $this->toAdditionalData($e));
             throw $e;
         }
 
         $magePayment->setTransactionId($paynetTransaction->getPayment()->getPaynetId());
         $magePayment
             ->addTransaction(MageTransaction::TYPE_PAYMENT)
-            ->setIsClosed(0)
+            ->setIsPending(true)
+            ->setIsClosed(false)
             ->save();
 
         $mageOrder->save();
@@ -213,7 +214,7 @@ extends         Mage_Payment_Model_Method_Abstract
         }
         catch (Exception $e)
         {
-            $this->cancelOrder($mageOrder, "Order '{$orderId}' cancelled, error occured");
+            $this->cancelOrder($mageOrder, "Order '{$orderId}' cancelled, error occured", $this->toAdditionalData($e));
             throw $e;
         }
 
@@ -223,7 +224,7 @@ extends         Mage_Payment_Model_Method_Abstract
         }
         elseif ($paynetTransaction->isFinished())
         {
-            $this->cancelOrder($mageOrder, $paynetTransaction->getLastError()->getMessage());
+            $this->cancelOrder($mageOrder, $paynetTransaction->getLastError()->getMessage(), $response->getArrayCopy());
         }
         else
         {
@@ -270,7 +271,7 @@ extends         Mage_Payment_Model_Method_Abstract
         }
         catch (Exception $e)
         {
-            $this->cancelOrder($mageOrder, "Order '{$orderId}' cancelled, error occured");
+            $this->cancelOrder($mageOrder, "Order '{$orderId}' cancelled, error occured", $this->toAdditionalData($e));
             throw $e;
         }
 
@@ -280,7 +281,7 @@ extends         Mage_Payment_Model_Method_Abstract
         }
         else
         {
-            $this->cancelOrder($mageOrder, $paynetTransaction->getLastError()->getMessage());
+            $this->cancelOrder($mageOrder, $paynetTransaction->getLastError()->getMessage(), $callbackResponse->getArrayCopy());
         }
 
         return $callbackResponse;
@@ -494,18 +495,28 @@ extends         Mage_Payment_Model_Method_Abstract
      * @param   MageOrder       $order          Order
      * @param   string          $message        Cancel message
      */
-    protected function cancelOrder(MageOrder $order, $message)
+    protected function cancelOrder(MageOrder $order, $message, array $errorData = array())
     {
+        $order->addStatusToHistory(MageOrder::STATE_CANCELED, Mage::helper('paynet')->__('cutomer_returned'));
+        $order->addStatusToHistory(MageOrder::STATE_CANCELED, $message);
+        
         $order->cancel()
-              ->setState(MageOrder::STATE_CANCELED, true, $message, true)
+              ->setState(MageOrder::STATE_CANCELED, true, '', true)
               ->sendOrderUpdateEmail()
-              ->setIsNotified(true)
               ->save();
         
         $payment = $order->getPayment();
         $payment->setStatus(self::STATUS_DECLINED);
         $payment->setIsTransactionDenied(true);
         $payment->save();
+        
+        $transaction = $payment->getTransaction($payment->getLastTransId());
+        
+        if (is_object($transaction)) {
+            $transaction->setAdditionalInformation(MageTransaction::RAW_DETAILS, $errorData);
+            
+            $transaction->save();
+        }
     }
 
     /**
@@ -515,9 +526,10 @@ extends         Mage_Payment_Model_Method_Abstract
      */
     protected function completeOrder(MageOrder $order)
     {
-        $order->setState(MageOrder::STATE_PROCESSING, true)
+        $order->addStatusToHistory(MageOrder::STATE_PROCESSING, Mage::helper('paynet')->__('cutomer_returned'));
+                
+        $order->setState(MageOrder::STATE_PROCESSING, true, '', true)
               ->sendOrderUpdateEmail()
-              ->setIsNotified(true)
               ->save();
         
         $payment = $order->getPayment();
@@ -526,5 +538,16 @@ extends         Mage_Payment_Model_Method_Abstract
         $payment->save();
         
         $order->save();
+    }
+    
+    /**
+     * Converts exception to string and returns it as transaction additional information array.
+     * 
+     * @param       Exception       $e          Exception to convert.
+     * 
+     * @return      array           Converted exception data.
+     */
+    protected function toAdditionalData(Exception $e) {
+        return array('exception' => (string) $e);
     }
 }

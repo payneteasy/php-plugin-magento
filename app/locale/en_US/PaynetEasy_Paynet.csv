@@ -8,3 +8,5 @@
 "seconds","sec"
 "check_result","Check result"
 "status_title","Payment being processed"
+"cutomer_redirected","Customer was redirected to PaynetEasy"
+"cutomer_returned","Customer was returned from PaynetEasy"

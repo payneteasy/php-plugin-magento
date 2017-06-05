@@ -1,5 +1,7 @@
 <?php
 
+use Mage_Sales_Model_Order as MageOrder;
+
 abstract class  PaynetEasy_Paynet_Controller_Abstract
 extends         Mage_Core_Controller_Front_Action
 {
@@ -26,6 +28,8 @@ extends         Mage_Core_Controller_Front_Action
         $callbackUrl   = Mage::getUrl("paynet/{$this->getModelCode()}/process",
                                        array('_secure' => true, 'order_id' => $orderId));
 
+        $this->markAsPending($orderId);
+        
         try
         {
             $this
@@ -174,6 +178,29 @@ extends         Mage_Core_Controller_Front_Action
         return $this->_model;
     }
 
+    /**
+     * Marks order as pending for payment.
+     * 
+     * @param type $orderId
+     */
+    protected function markAsPending($orderId) {
+        $order = Mage::getModel('sales/order');
+        $order->loadByIncrementId($orderId);
+
+        if (!$order->getId()) {
+            Mage::throwException('No order for processing found');
+        }
+        
+        if ($order->getState() != MageOrder::STATE_PENDING_PAYMENT) {
+            $order->setState(
+                MageOrder::STATE_PENDING_PAYMENT, 
+                MageOrder::STATE_PENDING_PAYMENT, 
+                Mage::helper('paynet')->__('cutomer_redirected')
+            );
+            $order->save();
+        }
+    }
+    
     /**
      * Get session object
      *

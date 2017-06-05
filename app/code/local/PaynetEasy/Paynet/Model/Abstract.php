@@ -40,6 +40,41 @@ extends         Mage_Payment_Model_Method_Abstract
     protected $_initialApiMethod;
 
     /**
+     * Is this payment method integrates third-party payment system?
+     * 
+     * @var boolean
+     */
+    protected $_isGateway               = true;
+    
+    /**
+     * Can use this payment method for payment authorization?
+     * 
+     * @var type 
+     */
+    protected $_canAuthorize            = true;
+
+    /**
+     * Can use this payment method for payment capture?
+     * 
+     * @var type 
+     */
+    protected $_canCapture              = true;
+
+    /**
+     * Can use this payment method for payment voiding?
+     * 
+     * @var type 
+     */
+    protected $_canVoid                 = false;
+
+    /**
+     * Can use this payment method for regular checkout process?
+     * 
+     * @var type 
+     */
+    protected $_canUseCheckout          = true;
+    
+    /**
      * Can use this payment method in administration panel?
      *
      * @var boolean
@@ -466,6 +501,11 @@ extends         Mage_Payment_Model_Method_Abstract
               ->sendOrderUpdateEmail()
               ->setIsNotified(true)
               ->save();
+        
+        $payment = $order->getPayment();
+        $payment->setStatus(self::STATUS_DECLINED);
+        $payment->setIsTransactionDenied(true);
+        $payment->save();
     }
 
     /**
@@ -479,5 +519,12 @@ extends         Mage_Payment_Model_Method_Abstract
               ->sendOrderUpdateEmail()
               ->setIsNotified(true)
               ->save();
+        
+        $payment = $order->getPayment();
+        $payment->setStatus(self::STATUS_APPROVED);
+        $payment->setIsTransactionApproved(true);
+        $payment->save();
+        
+        $order->save();
     }
 }

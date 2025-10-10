@@ -1,4 +1,1 @@
-##  Plugin for Magento 1.x for pay by PaynetEasy
-
-## [English documentation](doc/en/00-introduction.md)
-## [Русская документация](doc/ru/00-introduction.md)
+# [Documentation in English](https://github.com/annihilatoratm/magento-doc/blob/main/documentation/doc-eng.md)

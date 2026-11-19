@@ -437,14 +437,18 @@ extends         Mage_Payment_Model_Method_Abstract
             ->getPayment()
         ;
 
+        $card = method_exists($this, 'takeCardData')
+              ? $this->takeCardData()
+              : array('number' => '', 'cid' => '');
+
         $paynetTransaction
             ->getPayment()
             ->getCreditCard()
             ->setCardPrintedName($magePayment->getCcOwner())
-            ->setCreditCardNumber($magePayment->getCcNumber())
+            ->setCreditCardNumber($card['number'])
             ->setExpireMonth($magePayment->getCcExpMonth())
             ->setExpireYear(substr($magePayment->getCcExpYear(), 2))
-            ->setCvv2($magePayment->getCcCid())
+            ->setCvv2($card['cid'])
         ;
     }
 

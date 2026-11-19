@@ -49,7 +49,10 @@ extends PaynetEasy_Paynet_Model_Abstract
     }
 
     /**
-     * Prepare info instance for save
+     * Prepare info instance for save.
+     *
+     * The card number and CVV are not saved with the payment: they are kept
+     * encrypted in the checkout session until the sale request is sent.
      *
      * @return Mage_Payment_Model_Abstract
      */
@@ -57,14 +60,47 @@ extends PaynetEasy_Paynet_Model_Abstract
     {
         $info = $this->getInfoInstance();
 
-        $info->setCcNumberEnc($info->encrypt($info->getCcNumber()));
-        $info->setCcCidEnc($info->encrypt($info->getCcCid()));
+        if ($info->getCcNumber())
+        {
+            $card = json_encode(array
+            (
+                'number' => (string) $info->getCcNumber(),
+                'cid'    => (string) $info->getCcCid(),
+            ));
+
+            Mage::getSingleton('checkout/session')->setPaynetEasyCard(Mage::helper('core')->encrypt($card));
+
+            $info->setCcLast4(substr((string) $info->getCcNumber(), -4));
+        }
 
         $info
             ->setCcNumber(null)
-            ->setCcCid(null);
+            ->setCcCid(null)
+            ->setCcNumberEnc(null)
+            ->setCcCidEnc(null);
 
         return $this;
+    }
+
+    /**
+     * Takes the card number and CVV from the checkout session and removes them there.
+     *
+     * @return array
+     */
+    public function takeCardData()
+    {
+        $session = Mage::getSingleton('checkout/session');
+        $card    = $session->getPaynetEasyCard();
+
+        $session->unsPaynetEasyCard();
+
+        $data = $card ? json_decode(Mage::helper('core')->decrypt($card), true) : null;
+
+        return array
+        (
+            'number' => is_array($data) && isset($data['number']) ? (string) $data['number'] : '',
+            'cid'    => is_array($data) && isset($data['cid'])    ? (string) $data['cid']    : '',
+        );
     }
 
     /**

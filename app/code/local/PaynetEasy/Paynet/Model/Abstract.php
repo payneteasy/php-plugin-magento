@@ -363,7 +363,7 @@ extends         Mage_Payment_Model_Method_Abstract
             ->setClientId($mageOrder->getIncrementId())
             ->setPaynetId($mageOrder->getPayment()->getLastTransId())
             ->setDescription($this->getPaynetPaymentDescription($mageOrder))
-            ->setAmount($mageOrder->getBaseGrandTotal())
+            ->setAmount($mageOrder->getGrandTotal())
             ->setCurrency($mageOrder->getOrderCurrencyCode())
         ;
     }

@@ -204,18 +204,18 @@ extends         Mage_Payment_Model_Method_Abstract
     public function updateStatus($orderId)
     {
         $mageOrder          = $this->getMageOrder($orderId);
+        $this->assertOwnOrder($mageOrder, $orderId);
         $paynetTransaction  = $this->getPaynetTransaction($mageOrder);
 
-        try
+        // An error (network, gateway) says nothing about the payment: the order is not cancelled
+        $response = $this
+            ->getPaymentProcessor()
+            ->executeQuery('status', $paynetTransaction);
+
+        // Only an order waiting for payment changes its state
+        if ($mageOrder->getState() != MageOrder::STATE_PENDING_PAYMENT)
         {
-            $response = $this
-                ->getPaymentProcessor()
-                ->executeQuery('status', $paynetTransaction);
-        }
-        catch (Exception $e)
-        {
-            $this->cancelOrder($mageOrder, "Order '{$orderId}' cancelled, error occured", $this->toAdditionalData($e));
-            throw $e;
+            return $response;
         }
 
         if ($paynetTransaction->isApproved())
@@ -249,13 +249,10 @@ extends         Mage_Payment_Model_Method_Abstract
         $mageOrder = $this->getMageOrder($orderId);
         $callbackResponse = new CallbackResponse($callback);
 
-        if (!$mageOrder || !$mageOrder->getId())
-        {
-            throw new ResponseException("Order with id '{$orderId}' not found");
-        }
+        $this->assertOwnOrder($mageOrder, $orderId);
 
-        // already finished, no further actions
-        if ($mageOrder->getState() == MageOrder::STATE_PROCESSING)
+        // Only an order waiting for payment changes its state
+        if ($mageOrder->getState() != MageOrder::STATE_PENDING_PAYMENT)
         {
             return $callbackResponse;
         }
@@ -271,7 +268,7 @@ extends         Mage_Payment_Model_Method_Abstract
         }
         catch (Exception $e)
         {
-            $this->cancelOrder($mageOrder, "Order '{$orderId}' cancelled, error occured", $this->toAdditionalData($e));
+            // Invalid signature or data: the order is not changed
             throw $e;
         }
 
@@ -311,6 +308,21 @@ extends         Mage_Payment_Model_Method_Abstract
      *
      * @return      Mage_Sales_Model_Order                          Order object
      */
+    /**
+     * Checks that the order exists and is paid with this payment method
+     *
+     * @param       MageOrder|null      $mageOrder          Magento order
+     * @param       string              $orderId            Order ID from the request
+     */
+    protected function assertOwnOrder($mageOrder, $orderId)
+    {
+        if (!$mageOrder || !$mageOrder->getId()
+            || $mageOrder->getPayment()->getMethod() != $this->_code)
+        {
+            throw new ResponseException("Order with id '" . (int) $orderId . "' not found");
+        }
+    }
+
     protected function getMageOrder($orderId)
     {
         return Mage::getModel('sales/order')->loadByIncrementId($orderId);

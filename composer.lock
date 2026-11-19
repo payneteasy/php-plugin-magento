@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "26bac3cd3372df227aa3df0470b4b864",
+    "content-hash": "cdfcc2b99d2dd9a00c036d85c512d1cb",
     "packages": [
         {
             "name": "payneteasy/php-library-payneteasy-api",
@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/payneteasy/php-library-payneteasy-api.git",
-                "reference": "1501b4edf04c3edbb7e945ca4aca13c7e7b8b9d7"
+                "reference": "08e7aa7667a025f7b37cf348cbdb4a8c4bb3563c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/payneteasy/php-library-payneteasy-api/zipball/1501b4edf04c3edbb7e945ca4aca13c7e7b8b9d7",
-                "reference": "1501b4edf04c3edbb7e945ca4aca13c7e7b8b9d7",
+                "url": "https://api.github.com/repos/payneteasy/php-library-payneteasy-api/zipball/08e7aa7667a025f7b37cf348cbdb4a8c4bb3563c",
+                "reference": "08e7aa7667a025f7b37cf348cbdb4a8c4bb3563c",
                 "shasum": ""
             },
             "require": {
@@ -32,7 +32,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.0.0-dev"
+                    "dev-master": "1.1.x-dev"
                 }
             },
             "autoload": {
@@ -69,10 +69,10 @@
                 "payneteasy"
             ],
             "support": {
-                "source": "https://github.com/payneteasy/php-library-payneteasy-api/tree/master",
+                "source": "https://github.com/payneteasy/php-library-payneteasy-api/tree/v1.1.0",
                 "issues": "https://github.com/payneteasy/php-library-payneteasy-api/issues"
             },
-            "time": "2026-11-18T14:12:24+00:00"
+            "time": "2026-11-19T10:02:01+00:00"
         }
     ],
     "packages-dev": [],

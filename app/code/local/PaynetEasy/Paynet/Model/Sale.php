@@ -38,9 +38,10 @@ extends PaynetEasy_Paynet_Model_Abstract
         $info = $this->getInfoInstance();
 
         $info
-            ->setCcOwner($data->getCcOwner())
-            ->setCcNumber($data->getCcNumber())
-            ->setCcCid($data->getCcCid())
+            ->setCcOwner(trim((string) $data->getCcOwner()))
+            // Customers type the number with spaces or dashes: send digits only
+            ->setCcNumber(preg_replace('/\D+/', '', (string) $data->getCcNumber()))
+            ->setCcCid(preg_replace('/\D+/', '', (string) $data->getCcCid()))
             ->setCcExpMonth($data->getCcExpMonth())
             ->setCcExpYear($data->getCcExpYear())
         ;

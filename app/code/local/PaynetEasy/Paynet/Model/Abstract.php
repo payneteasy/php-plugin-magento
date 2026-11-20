@@ -574,6 +574,22 @@ extends         Mage_Payment_Model_Method_Abstract
      * @return      array           Converted exception data.
      */
     protected function toAdditionalData(Exception $e) {
-        return array('exception' => (string) $e);
+        return array('exception' => self::safeErrorText($e));
+    }
+
+    /**
+     * Error text for logs and order data: without field values (card data may be
+     * among them) and without the stack trace.
+     *
+     * @param       Exception       $e
+     *
+     * @return      string
+     */
+    public static function safeErrorText(Exception $e)
+    {
+        $message = preg_replace("/Value '[^']*'/", "Value '***'", $e->getMessage());
+        $message = preg_replace('/\d{6,}/', '***', $message);
+
+        return get_class($e) . ': ' . $message;
     }
 }

@@ -23,8 +23,8 @@ extends PaynetEasy_Paynet_Controller_Abstract
         }
         catch (Exception $e)
         {
-            Mage::log("There was an error occured for Order '{$orderId}': \n{$e->getMessage()}", Zend_Log::ERR);
-            Mage::logException($e);
+            Mage::log("There was an error occured for Order '{$orderId}': \n" . PaynetEasy_Paynet_Model_Abstract::safeErrorText($e), Zend_Log::ERR);
+            Mage::log(PaynetEasy_Paynet_Model_Abstract::safeErrorText($e), Zend_Log::ERR, 'exception.log');
             $this->errorRedirect('technical_error');
         }
     }

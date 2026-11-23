@@ -12,6 +12,12 @@ extends PaynetEasy_Paynet_Controller_Abstract
         $callbackUrl   = Mage::getUrl("paynet/{$this->getModelCode()}/process",
                                        array('_secure' => true, 'order_id' => $orderId));
 
+        // Only an order just placed with PaynetEasy starts a payment
+        if (!$this->isStartableOrder($orderId)) {
+            $this->_redirect('checkout/cart');
+            return;
+        }
+
         $this->markAsPending($orderId);
 
         try

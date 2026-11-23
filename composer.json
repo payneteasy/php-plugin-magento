@@ -19,6 +19,7 @@
         }
     ],
     "minimum-stability": "dev",
+    "prefer-stable": true,
     "repositories":
     [
         {
@@ -29,7 +30,7 @@
     "require":
     {
         "php":                                      ">=7.1.0",
-        "payneteasy/php-library-payneteasy-api":    "~1.0"
+        "payneteasy/php-library-payneteasy-api":    "^1.1.1"
     },
     "config":
     {

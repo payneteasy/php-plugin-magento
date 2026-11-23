@@ -28,6 +28,13 @@ extends         Mage_Core_Controller_Front_Action
         $callbackUrl   = Mage::getUrl("paynet/{$this->getModelCode()}/process",
                                        array('_secure' => true, 'order_id' => $orderId));
 
+        // Only an order just placed with PaynetEasy starts a payment: opening this
+        // page again must not reopen a paid, cancelled or already started order
+        if (!$this->isStartableOrder($orderId)) {
+            $this->_redirect('checkout/cart');
+            return;
+        }
+
         $this->markAsPending($orderId);
         
         try
@@ -183,6 +190,25 @@ extends         Mage_Core_Controller_Front_Action
      * 
      * @param type $orderId
      */
+    /**
+     * True for an order placed with a PaynetEasy method and not processed yet.
+     *
+     * @param       string      $orderId        Order increment id
+     *
+     * @return      bool
+     */
+    protected function isStartableOrder($orderId) {
+        if (!$orderId) {
+            return false;
+        }
+
+        $order = Mage::getModel('sales/order')->loadByIncrementId($orderId);
+
+        return $order->getId()
+            && $order->getState() === MageOrder::STATE_NEW
+            && in_array($order->getPayment()->getMethod(), array('paynet_sale', 'paynet_saleform'), true);
+    }
+
     protected function markAsPending($orderId) {
         $order = Mage::getModel('sales/order');
         $order->loadByIncrementId($orderId);

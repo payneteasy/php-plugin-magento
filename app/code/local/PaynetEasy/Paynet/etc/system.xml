@@ -56,7 +56,8 @@
                         </merchant_login>
                         <merchant_key translate="label">
                             <label>Merchant key</label>
-                            <frontend_type>text</frontend_type>
+                            <frontend_type>obscure</frontend_type>
+                            <backend_model>paynet/system_config_backend_merchantkey</backend_model>
                             <sort_order>50</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -149,7 +150,8 @@
                         </merchant_login>
                         <merchant_key translate="label">
                             <label>Merchant key</label>
-                            <frontend_type>text</frontend_type>
+                            <frontend_type>obscure</frontend_type>
+                            <backend_model>paynet/system_config_backend_merchantkey</backend_model>
                             <sort_order>50</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>

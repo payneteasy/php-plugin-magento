@@ -63,7 +63,15 @@ extends         Mage_Core_Controller_Front_Action
      */
     public function statusAction()
     {
-        $orderId   = $this->getRequest()->order_id;
+        $orderId   = $this->getRequestOrderId();
+
+        // The page (it may show the 3-D Secure form) is only for the customer
+        // who has just placed this order
+        if ($orderId === '' || $orderId !== (string) $this->getSession()->getLastRealOrderId())
+        {
+            $this->_redirect('checkout/cart');
+            return;
+        }
 
         try
         {
@@ -116,7 +124,7 @@ extends         Mage_Core_Controller_Front_Action
      */
     public function processAction()
     {
-        $orderId  = $this->getRequest()->order_id;
+        $orderId  = $this->getRequestOrderId();
         $callback = $_REQUEST;
 
         try
@@ -127,7 +135,6 @@ extends         Mage_Core_Controller_Front_Action
         catch (Exception $e)
         {
             Mage::log("There was an error occured for Order '{$orderId}': \n" . PaynetEasy_Paynet_Model_Abstract::safeErrorText($e), Zend_Log::ERR);
-            Mage::log("Callback data: " . print_r($callback, true), Zend_Log::DEBUG);
             Mage::log(PaynetEasy_Paynet_Model_Abstract::safeErrorText($e), Zend_Log::ERR, 'exception.log');
             return $this->errorRedirect('technical_error');
         }
@@ -138,10 +145,27 @@ extends         Mage_Core_Controller_Front_Action
         }
         else
         {
-            Mage::log("Payment is not passed", Zend_Log::DEBUG);
-            Mage::log("Callback data: " . print_r($callback, true), Zend_Log::DEBUG);
+            Mage::log("Payment is not passed for Order '{$orderId}'", Zend_Log::DEBUG);
             $this->errorRedirect('payment_not_passed');
         }
+    }
+
+    /**
+     * Order ID from the request: a short string of letters, digits, "-" and "_",
+     * safe to write to a log. Anything else gives an empty string.
+     *
+     * @return      string      Order ID
+     */
+    protected function getRequestOrderId()
+    {
+        $orderId = $this->getRequest()->getParam('order_id');
+
+        if (!is_scalar($orderId) || !preg_match('#^[0-9a-z_-]{1,50}$#i', (string) $orderId))
+        {
+            return '';
+        }
+
+        return (string) $orderId;
     }
 
     /**

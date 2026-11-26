@@ -14,6 +14,8 @@ use PaynetEasy_Paynet_Model_System_Config_Source_Endpointmode as EndpointMode;
 use PaynetEasy\PaynetEasyApi\PaymentProcessor;
 
 use PaynetEasy\PaynetEasyApi\Exception\ResponseException;
+use PaynetEasy\PaynetEasyApi\Exception\ValidationException;
+use PaynetEasy\PaynetEasyApi\Exception\PaynetException;
 
 abstract class  PaynetEasy_Paynet_Model_Abstract
 extends         Mage_Payment_Model_Method_Abstract
@@ -94,6 +96,11 @@ extends         Mage_Payment_Model_Method_Abstract
      * @var boolean
      */
     protected $_isInitializeNeeded      = true;
+
+    /**
+     * Seconds to wait for the lock of an order
+     */
+    const ORDER_LOCK_TIMEOUT            = 30;
 
     /**
      * Instantiate state and set it to state object
@@ -218,17 +225,40 @@ extends         Mage_Payment_Model_Method_Abstract
             return $response;
         }
 
-        if ($paynetTransaction->isApproved())
+        if (!$paynetTransaction->isApproved() && !$paynetTransaction->isFinished())
         {
-            $this->completeOrder($mageOrder);
+            return $response;
         }
-        elseif ($paynetTransaction->isFinished())
+
+        // The customer return, the callback and this page may come together:
+        // the order is changed by one of them only
+        if (!$this->lockOrder($mageOrder))
         {
-            $this->cancelOrder($mageOrder, $paynetTransaction->getLastError()->getMessage(), $response->getArrayCopy());
+            return $response;
         }
-        else
+
+        try
         {
-            $mageOrder->save();
+            // The state is read again: another request may have changed the order
+            $mageOrder = $this->getMageOrder($orderId);
+
+            if ($mageOrder->getState() != MageOrder::STATE_PENDING_PAYMENT)
+            {
+                return $response;
+            }
+
+            if ($paynetTransaction->isApproved())
+            {
+                $this->completeOrder($mageOrder);
+            }
+            else
+            {
+                $this->cancelOrder($mageOrder, $this->getLastErrorMessage($paynetTransaction), $response->getArrayCopy());
+            }
+        }
+        finally
+        {
+            $this->unlockOrder($mageOrder);
         }
 
         return $response;
@@ -257,31 +287,130 @@ extends         Mage_Payment_Model_Method_Abstract
             return $callbackResponse;
         }
 
-        $paynetTransaction = $this->getPaynetTransaction($mageOrder);
-        $paynetTransaction->setStatus(PaynetTransaction::STATUS_PROCESSING);
+        // The customer return, the callback and the status page may come together:
+        // the order is changed by one of them only
+        if (!$this->lockOrder($mageOrder))
+        {
+            return $callbackResponse;
+        }
 
         try
         {
-            $this
-                ->getPaymentProcessor()
-                ->processCustomerReturn(new CallbackResponse($callback), $paynetTransaction);
-        }
-        catch (Exception $e)
-        {
-            // Invalid signature or data: the order is not changed
-            throw $e;
-        }
+            // The state is read again: another request may have changed the order
+            $mageOrder = $this->getMageOrder($orderId);
 
-        if ($paynetTransaction->isApproved())
-        {
-            $this->completeOrder($mageOrder);
+            if ($mageOrder->getState() != MageOrder::STATE_PENDING_PAYMENT)
+            {
+                return $callbackResponse;
+            }
+
+            $paynetTransaction = $this->getPaynetTransaction($mageOrder);
+            $paynetTransaction->setStatus(PaynetTransaction::STATUS_PROCESSING);
+
+            try
+            {
+                $this
+                    ->getPaymentProcessor()
+                    ->processCustomerReturn(new CallbackResponse($callback), $paynetTransaction);
+            }
+            catch (Exception $e)
+            {
+                // Invalid signature or data: the order is not changed.
+                // A checked return with the status "error" is a final refusal,
+                // the library reports it with an exception too.
+                if (   $e instanceof ValidationException
+                    || !($e instanceof PaynetException)
+                    || !$paynetTransaction->isError()
+                    || $callbackResponse->getStatus() != PaynetTransaction::STATUS_ERROR)
+                {
+                    throw $e;
+                }
+            }
+
+            if ($paynetTransaction->isApproved())
+            {
+                $this->completeOrder($mageOrder);
+            }
+            else
+            {
+                $this->cancelOrder($mageOrder, $this->getLastErrorMessage($paynetTransaction), $callbackResponse->getArrayCopy());
+            }
         }
-        else
+        finally
         {
-            $this->cancelOrder($mageOrder, $paynetTransaction->getLastError()->getMessage(), $callbackResponse->getArrayCopy());
+            $this->unlockOrder($mageOrder);
         }
 
         return $callbackResponse;
+    }
+
+    /**
+     * Takes the lock of the order. The lock belongs to the database connection
+     * and is released by unlockOrder() or when the connection is closed.
+     *
+     * @param       MageOrder       $mageOrder          Magento order
+     *
+     * @return      boolean                             False if the lock was not received in time
+     */
+    protected function lockOrder(MageOrder $mageOrder)
+    {
+        return (bool) $this->getLockConnection()
+            ->fetchOne('SELECT GET_LOCK(?, ?)', array($this->getOrderLockName($mageOrder), self::ORDER_LOCK_TIMEOUT));
+    }
+
+    /**
+     * Releases the lock of the order
+     *
+     * @param       MageOrder       $mageOrder          Magento order
+     */
+    protected function unlockOrder(MageOrder $mageOrder)
+    {
+        try
+        {
+            $this->getLockConnection()
+                ->fetchOne('SELECT RELEASE_LOCK(?)', array($this->getOrderLockName($mageOrder)));
+        }
+        catch (Exception $e)
+        {
+            // The lock is released when the connection is closed
+        }
+    }
+
+    /**
+     * @return      Varien_Db_Adapter_Interface
+     */
+    protected function getLockConnection()
+    {
+        return Mage::getSingleton('core/resource')->getConnection('core_write');
+    }
+
+    /**
+     * Lock name: one per order of this shop (lock names are common for the database server)
+     *
+     * @param       MageOrder       $mageOrder          Magento order
+     *
+     * @return      string
+     */
+    protected function getOrderLockName(MageOrder $mageOrder)
+    {
+        $config = $this->getLockConnection()->getConfig();
+        $dbName = is_array($config) && isset($config['dbname']) ? $config['dbname'] : '';
+
+        return 'paynet_' . sha1($dbName . '|' . $mageOrder->getResource()->getMainTable() . '|' . $mageOrder->getId());
+    }
+
+    /**
+     * Text of the last payment transaction error
+     *
+     * @param       PaynetTransaction       $paynetTransaction      PaynetEasy payment transaction
+     *
+     * @return      string
+     */
+    protected function getLastErrorMessage(PaynetTransaction $paynetTransaction)
+    {
+        $error = $paynetTransaction->getLastError();
+
+        return $error ? (string) $error->getMessage() : '';
     }
 
     /**
@@ -363,7 +492,8 @@ extends         Mage_Payment_Model_Method_Abstract
             ->setClientId($mageOrder->getIncrementId())
             ->setPaynetId($mageOrder->getPayment()->getLastTransId())
             ->setDescription($this->getPaynetPaymentDescription($mageOrder))
-            ->setAmount($mageOrder->getGrandTotal())
+            // Two decimals: the stored total has four, and is too long for the gateway from 1 000 000
+            ->setAmount(number_format(round((float) $mageOrder->getGrandTotal(), 2), 2, '.', ''))
             ->setCurrency($mageOrder->getOrderCurrencyCode())
         ;
     }
@@ -466,7 +596,7 @@ extends         Mage_Payment_Model_Method_Abstract
         
         $queryConfig 
             ->setLogin($this->getConfigData('merchant_login'))
-            ->setSigningKey($this->getConfigData('merchant_key'))
+            ->setSigningKey(Mage::helper('paynet')->decryptMerchantKey($this->getConfigData('merchant_key')))
             ->setGatewayMode($this->getConfigData('gateway_mode'))
             ->setGatewayUrlSandbox($this->getConfigData('sandbox_api_url'))
             ->setGatewayUrlProduction($this->getConfigData('production_api_url'))

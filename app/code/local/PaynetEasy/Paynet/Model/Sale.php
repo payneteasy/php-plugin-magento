@@ -23,6 +23,24 @@ extends PaynetEasy_Paynet_Model_Abstract
     protected $_initialApiMethod    = 'sale';
 
     /**
+     * Seconds the card data may wait in the checkout session for the sale request
+     */
+    const CARD_TTL = 900;
+
+    /**
+     * {@inheritdoc}
+     *
+     * Called when the checkout lists the payment methods: card data left
+     * from an earlier, unfinished attempt is removed here.
+     */
+    public function isAvailable($quote = null)
+    {
+        $this->removeExpiredCardData();
+
+        return parent::isAvailable($quote);
+    }
+
+    /**
      * Assign data to info model instance
      *
      * @param   mixed $data
@@ -69,7 +87,11 @@ extends PaynetEasy_Paynet_Model_Abstract
                 'cid'    => (string) $info->getCcCid(),
             ));
 
-            Mage::getSingleton('checkout/session')->setPaynetEasyCard(Mage::helper('core')->encrypt($card));
+            Mage::getSingleton('checkout/session')->setPaynetEasyCard(array
+            (
+                'data'    => Mage::helper('core')->encrypt($card),
+                'expires' => time() + self::CARD_TTL,
+            ));
 
             $info->setCcLast4(substr((string) $info->getCcNumber(), -4));
         }
@@ -85,23 +107,52 @@ extends PaynetEasy_Paynet_Model_Abstract
 
     /**
      * Takes the card number and CVV from the checkout session and removes them there.
+     * Data older than CARD_TTL seconds is not used.
      *
      * @return array
      */
     public function takeCardData()
     {
         $session = Mage::getSingleton('checkout/session');
-        $card    = $session->getPaynetEasyCard();
+        $card    = $this->isCardDataValid($session->getPaynetEasyCard())
+                 ? $session->getPaynetEasyCard()
+                 : null;
 
         $session->unsPaynetEasyCard();
 
-        $data = $card ? json_decode(Mage::helper('core')->decrypt($card), true) : null;
+        $data = $card ? json_decode(Mage::helper('core')->decrypt((string) $card['data']), true) : null;
 
         return array
         (
             'number' => is_array($data) && isset($data['number']) ? (string) $data['number'] : '',
             'cid'    => is_array($data) && isset($data['cid'])    ? (string) $data['cid']    : '',
         );
+    }
+
+    /**
+     * Removes card data from the checkout session when it is older than CARD_TTL seconds.
+     */
+    public function removeExpiredCardData()
+    {
+        $session = Mage::getSingleton('checkout/session');
+        $card    = $session->getPaynetEasyCard();
+
+        if ($card !== null && !$this->isCardDataValid($card))
+        {
+            $session->unsPaynetEasyCard();
+        }
+    }
+
+    /**
+     * @param   mixed   $card   Card data from the checkout session
+     *
+     * @return  bool
+     */
+    protected function isCardDataValid($card)
+    {
+        return is_array($card)
+            && isset($card['data'], $card['expires'])
+            && (int) $card['expires'] >= time();
     }
 
     /**
